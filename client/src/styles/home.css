@@ -1,0 +1,128 @@
+/* Full viewport container with background image */
+/* Reset default body & html margins */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.home-container {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('../assets/interactive_pic.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+/* Dark overlay for text readability */
+.overlay {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 50px 40px;
+  border-radius: 20px;
+  text-align: center;
+  color: white;
+  max-width: 500px;
+  width: 90%;
+}
+
+/* Heading style */
+.overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+/* Subtext style */
+.overlay p {
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+}
+
+/* Buttons container */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Button styles */
+.buttons button {
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.buttons button:first-child {
+  background-color: #4caf50;
+  color: white;
+}
+
+.buttons button:first-child:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.buttons button:last-child {
+  background-color: #2196f3;
+  color: white;
+}
+
+.buttons button:last-child:hover {
+  background-color: #1e88e5;
+  transform: scale(1.05);
+}
+
+/* Fade-in animations */
+.fade-in {
+  opacity: 0;
+  animation: fadeInUp 1s forwards;
+}
+
+.delay-1 {
+  animation-delay: 0.5s;
+}
+
+.delay-2 {
+  animation-delay: 1s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 600px) {
+  .overlay h1 {
+    font-size: 2rem;
+  }
+
+  .overlay p {
+    font-size: 1rem;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+
+  .buttons button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

@@ -1,0 +1,96 @@
+.learner-dashboard {
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.paths-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.path-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  width: 300px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.path-card:hover {
+  transform: scale(1.03);
+}
+
+.path-header {
+  cursor: pointer;
+}
+
+.path-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.path-info {
+  padding: 15px;
+}
+
+.resources-list {
+  list-style: none;
+  padding: 15px;
+  border-top: 1px solid #eee;
+}
+
+.resource-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.resource-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.continue-btn {
+  padding: 5px 10px;
+  background: #2196f3;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.complete-btn {
+  padding: 5px 10px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.completed-label {
+  font-weight: bold;
+  color: green;
+}
+
+.register-btn, .certificate-btn {
+  margin: 10px 15px;
+  padding: 8px 15px;
+  width: calc(100% - 30px);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.register-btn {
+  background: #ff9800;
+  color: #fff;
+}
+
+.certificate-btn {
+  background: #9c27b0;
+  color: #fff;
+}

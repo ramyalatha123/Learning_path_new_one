@@ -1,0 +1,113 @@
+/* Global styles for the page */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  background-color: #f4f7f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* The main container for the auth form */
+.auth-container {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+/* Form heading */
+.auth-container h2 {
+  text-align: center;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Form layout */
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Adds space between form elements */
+}
+
+/* Styles for text inputs and the select dropdown */
+.auth-container input[type="text"],
+.auth-container input[type="email"],
+.auth-container input[type="password"],
+.auth-container select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding doesn't affect width */
+  transition: border-color 0.2s;
+}
+
+/* Focus style for inputs/select */
+.auth-container input:focus,
+.auth-container select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+/* Submit button */
+.auth-container button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #007bff; /* Formal blue */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-container button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Bottom text ("Already have an account?") */
+.auth-container p {
+  text-align: center;
+  color: #555;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* The clickable "Login here" link */
+.link {
+  color: #007bff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Success message (green) */
+.success-msg {
+  color: #28a745;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* Error message (red) */
+.error-msg {
+  color: #dc3545;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 1rem;
+}

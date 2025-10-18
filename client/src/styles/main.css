@@ -1,0 +1,52 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-container {
+  width: 320px;
+  margin: 80px auto;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #fff;
+  text-align: center;
+}
+
+.auth-container input,
+.auth-container select,
+.auth-container button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.auth-container button {
+  background-color: #1976D2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.progress-bar-container {
+  height: 12px;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  margin: 5px 0 15px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+.learning-path-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  background: #f9f9f9;
+}
