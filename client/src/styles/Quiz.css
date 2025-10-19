@@ -1,0 +1,68 @@
+/* --- Styles for Quiz.jsx --- */
+.quiz-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-question {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+.quiz-question:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.quiz-question h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.quiz-options {
+  display: flex; /* Use flexbox for spacing */
+  flex-direction: column; /* Stack options vertically */
+  gap: 0.75rem; /* Space between options */
+}
+
+/* --- THIS IS THE KEY FIX --- */
+.quiz-options label {
+  display: block; /* Make each label take its own line */
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+/* --- END OF FIX --- */
+
+.quiz-options label:hover {
+  background-color: #f0f0f0; /* Highlight on hover */
+}
+
+.quiz-options input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+/* Style the submit button (you might already have btn-submit) */
+.btn-submit {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #a435f0; /* Purple, like Udemy */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: background-color 0.2s;
+}
+.btn-submit:hover {
+  background-color: #8710d8;
+}

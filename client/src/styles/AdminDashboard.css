@@ -1,0 +1,116 @@
+/* --- Styles for AdminDashboard.jsx --- */
+
+/* Ensure body doesn't interfere */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f7f9fa; 
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scrolling */
+}
+
+.admin-dashboard {
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Stack header and content */
+  height: 100vh; /* Fill screen height */
+  box-sizing: border-box; 
+  overflow: hidden; /* Prevent this container from scrolling */
+  background-color: #f7f9fa; 
+}
+
+/* --- Header Section (Optional but good structure) --- */
+.admin-header { /* You can add this class to a div wrapping your h1/p */
+  padding: 1.5rem 2rem; 
+  background-color: #fff; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
+  flex-shrink: 0; /* Prevent header shrinking */
+  z-index: 10; 
+}
+.admin-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+ .admin-header p {
+    margin: 0.25rem 0 0 0;
+    color: #555;
+}
+
+
+/* --- Scrollable Content Area --- */
+.admin-content { /* Add this class to a div wrapping your sections */
+  flex-grow: 1; /* Take remaining height */
+  overflow-y: auto; /* MAKE THIS SCROLLABLE */
+  padding: 1rem 2rem 2rem 2rem; 
+}
+
+.admin-content section {
+    margin-bottom: 2.5rem; /* Space between sections */
+    background-color: #fff; /* White background for sections */
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+ .admin-content h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+    font-size: 1.25rem;
+    color: #333;
+ }
+
+
+/* --- Table Styles --- */
+.admin-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.admin-content th, 
+.admin-content td {
+  padding: 10px 12px; /* Consistent padding */
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-content th {
+  background-color: #f8f9fa; /* Light grey header */
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+ .admin-content tr:last-child td {
+    border-bottom: none; /* Remove border on last row */
+ }
+
+/* --- Delete Button --- */
+.admin-content button {
+  color: #dc3545; /* Red */
+  background: none;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+ .admin-content button:hover {
+    background-color: #dc3545;
+    color: white;
+ }
+
+/* Message Styles */
+.admin-content p[style*="color: red"],
+.admin-content p[style*="color: green"] {
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+.admin-content p[style*="color: red"] {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+ .admin-content p[style*="color: green"] {
+    background-color: #d4edda;
+     border: 1px solid #c3e6cb;
+}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom"; // <-- 1. IMPORT LINK
 import API from "../../api";
 import { AuthContext } from "../../context/AuthContext";
-// import './PathViewer.css'; // You can create a CSS file for this
+import '../../styles/PathViewer.css';// You can create a CSS file for this
 
 const PathViewer = () => {
   const { pathId } = useParams();
@@ -15,7 +15,6 @@ const PathViewer = () => {
   // Fetch the single path's data
   const fetchPath = async () => {
     try {
-      // This API route now exists!
       const res = await API.get(`/learner/path/${pathId}`);
       setPath(res.data);
       setLoading(false);
@@ -34,7 +33,6 @@ const PathViewer = () => {
     try {
       await API.post(`/learner/complete-resource/${resourceId}`);
       
-      // Update the state locally for a fast UI response
       setPath(prevPath => {
         const updatedResources = prevPath.resources.map(r => 
           r.id === resourceId ? { ...r, completed: true } : r
@@ -52,7 +50,6 @@ const PathViewer = () => {
   }
 
   if (!path) {
-    // This is the "Path not found" you were seeing
     return <div>Path not found.</div>;
   }
 
@@ -62,7 +59,7 @@ const PathViewer = () => {
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="path-viewer-container"> {/* Add styles for this class */ }
+    <div className="path-viewer-container">
       <button onClick={() => navigate("/Dashboard/LearnerDashboard")}>
         &larr; Back to Dashboard
       </button>
@@ -80,18 +77,33 @@ const PathViewer = () => {
         {path.resources.map((res) => (
           <li key={res.id} className="resource-item">
             <div>
-              <strong>{res.title}</strong>
+              <strong>{res.title} ({res.type})</strong> {/* <-- Show the type */}
               <p>{res.description} ({res.estimated_time} mins)</p>
             </div>
             <div className="resource-buttons">
-              <a
-                href={res.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="continue-btn"
-              >
-                Continue Learning
-              </a>
+
+              {/* --- 2. THIS IS THE NEW LOGIC --- */}
+              {res.type === 'video' || res.type === 'article' ? (
+                // If it's a video/article, show the "Continue" <a> link
+                <a
+                  href={res.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="continue-btn"
+                >
+                  Continue Learning
+                </a>
+              ) : (
+                // If it's a quiz, show the "Start Quiz" <Link>
+                <Link 
+                  to={`/quiz/${res.id}`} 
+                  className="continue-btn"
+                >
+                  Start Quiz
+                </Link>
+              )}
+              {/* --- END OF NEW LOGIC --- */}
+
               {!res.completed ? (
                 <button
                   onClick={() => completeResource(res.id)}

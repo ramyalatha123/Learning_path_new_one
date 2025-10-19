@@ -214,4 +214,61 @@ router.get("/certificate/:pathId", authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/learner/quiz/submit
+// Checks quiz answers and returns a score
+router.post("/quiz/submit", authMiddleware, async (req, res) => {
+  const { resourceId, answers } = req.body; // answers is { "questionId": "optionId", ... }
+  const { id: userId } = req.user;
+
+  try {
+    const questionIds = Object.keys(answers);
+    if (questionIds.length === 0) {
+      return res.json({ score: 0, passed: false });
+    }
+
+    // Get all the *correct* options for these questions
+    const correctOptionsResult = await pool.query(
+      `SELECT question_id, id as correct_option_id
+       FROM Options
+       WHERE question_id = ANY($1::int[]) AND is_correct = TRUE`,
+      [questionIds]
+    );
+
+    const correctAnswers = {};
+    correctOptionsResult.rows.forEach(row => {
+      correctAnswers[row.question_id] = row.correct_option_id;
+    });
+
+    // Compare user's answers to correct answers
+    let correctCount = 0;
+    for (const questionId of questionIds) {
+      // User's answer was correct
+      if (answers[questionId] == correctAnswers[questionId]) {
+        correctCount++;
+      }
+    }
+
+    const score = Math.round((correctCount / questionIds.length) * 100);
+    const passed = score >= 70; // You can set any passing score
+
+    // If they passed, also mark the resource as complete
+    if (passed) {
+      await pool.query(
+        `INSERT INTO LearnerProgress (learner_id, resource_id, completed)
+         VALUES ($1, $2, TRUE)
+         ON CONFLICT (learner_id, resource_id) DO UPDATE SET completed = TRUE`,
+        [userId, resourceId]
+      );
+    }
+
+    res.json({ score, passed });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+module.exports = router; // This should be at the very bottom
+
 module.exports = router;

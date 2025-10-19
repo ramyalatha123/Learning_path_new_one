@@ -1,36 +1,76 @@
 /* --- Page Setup --- */
-.learner-dashboard {
-  padding: 2rem;
+body { 
   font-family: 'Poppins', sans-serif;
-  background-color: #f7f9fa; /* Light grey page background */
+  background-color: #f7f9fa;
+  margin: 0;
+  padding: 0;
+  /* Prevent body scrolling, we scroll inside the dashboard */
+  overflow: hidden; 
 }
 
-h2 {
-  text-align: center;
+/* --- Main Dashboard Container --- */
+.learner-dashboard {
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Stack header and content vertically */
+  height: 100vh; /* Fill screen height */
+  box-sizing: border-box; 
+  overflow: hidden; /* Prevent this container from scrolling */
+  background-color: #f7f9fa; /* Ensure background consistency */
+}
+
+/* --- Header Section (Non-Scrollable) --- */
+.dashboard-header {
+  padding: 1.5rem 2rem; 
+  background-color: #fff; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
+  flex-shrink: 0; /* Prevent header from shrinking */
+  z-index: 10; 
+}
+
+.dashboard-header h2 {
+  text-align: left; /* Align welcome message left */
   font-weight: 600;
   color: #333;
-  margin-bottom: 2rem;
+  margin: 0; 
+  font-size: 1.5rem; /* Slightly larger welcome */
 }
 
+/* --- Scrollable Content Area --- */
+.dashboard-content {
+  flex-grow: 1; /* Take remaining height */
+  overflow-y: auto; /* MAKE THIS SCROLLABLE */
+  padding: 1rem 2rem 2rem 2rem; 
+}
+
+.dashboard-content h3 {
+  margin-top: 1.5rem; /* Space above section titles */
+  margin-bottom: 1rem;
+  font-weight: 700; /* Bolder section titles */
+  color: #1c1d1f; /* Darker title color like Udemy */
+  font-size: 1.25rem;
+}
+.dashboard-content h3:first-child {
+  margin-top: 0.5rem; /* Less space above the very first title */
+}
+
+/* --- Course Cards Container --- */
 .paths-container {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  justify-content: center;
+  justify-content: flex-start; /* Align cards to the left */
 }
 
-/* --- Card: This is the main fix --- */
+/* --- Path Card Styles (Keep your existing styles) --- */
 .path-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 8px; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 300px;
   overflow: hidden;
   transition: all 0.3s ease;
-  
-  /* === FLEXBOX FIX FOR EQUAL HEIGHTS === */
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
 }
 
 .path-card:hover {
@@ -40,48 +80,60 @@ h2 {
 
 .path-header {
   cursor: pointer;
-  /* This part is just a container, no extra styles needed */
 }
 
-/* --- Image: This is the image fix --- */
 .path-image {
   width: 100%;
-  height: 170px;         /* ✅ Set a fixed height */
-  object-fit: cover;      /* ✅ Fill the box, cropping sides if needed */
-  object-position: top;   /* ✅ Show the top of the image */
-  background-color: #f0f0f0; /* Fallback color */
+  height: 170px;         
+  object-fit: cover;      
+  object-position: top;   
+  background-color: #f0f0f0; 
   display: block;
 }
 
-/* --- Info: This is the equal height fix --- */
 .path-info {
   padding: 1rem;
-  
-  /* ✅ This makes the text area grow */
-  flex-grow: 1; 
+  flex-grow: 1; /* Ensure info section grows */
+  display: flex; /* Use flex to make paragraph grow */
+  flex-direction: column;
 }
 
 .path-info h3 {
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
-  margin: 0 0 0.5rem 0; /* Title styling */
+  margin: 0 0 0.5rem 0; 
 }
 
 .path-info p {
   font-size: 0.9rem;
   color: #555;
-  margin: 0 0 1rem 0; /* Description styling */
-  /* This will grow and push the progress bar down */
-  flex-grow: 1; 
+  margin: 0 0 1rem 0; 
+  flex-grow: 1; /* Make description push progress bar down */
+}
+
+/* --- Progress Bar --- */
+/* Assuming ProgressBar.jsx uses these classes */
+.progress-bar-container { 
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 0.5rem; /* Space below progress bar */
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50; /* Green */
+  border-radius: 4px;
 }
 
 /* --- Buttons --- */
 .register-btn, .certificate-btn {
-  /* These buttons are at the bottom of the card */
-  display: block; /* Make them full-width */
+  display: block; 
   padding: 10px 15px;
-  margin: 0 1rem 1rem 1rem; /* Add margin to match info padding */
+  margin: 0 1rem 1rem 1rem; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -89,63 +141,27 @@ h2 {
   font-size: 0.9rem;
   text-align: center;
   transition: background-color 0.2s;
+  text-decoration: none; /* For the <a> tag */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 .register-btn {
   background: #ff9800;
   color: #fff;
 }
+.register-btn:hover {
+  background: #e68900;
+}
 
 .certificate-btn {
   background: #9c27b0;
   color: #fff;
 }
-
-/* --- Resources List (when expanded) --- */
-.resources-list {
-  list-style: none;
-  padding: 0 1rem 1rem 1rem;
-  margin: 0;
-  border-top: 1px solid #eee;
+.certificate-btn:hover {
+  background: #7b1fa2;
 }
 
-.resource-item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.9rem;
-}
-.resource-item:last-child {
-  border-bottom: none;
-}
-
-.resource-buttons {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.continue-btn {
-  padding: 5px 10px;
-  background: #2196f3;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 5px;
-  font-size: 0.8rem;
-}
-
-.complete-btn {
-  padding: 5px 10px;
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-.completed-label {
-  font-weight: bold;
-  color: green;
-  font-size: 0.8rem;
+/* Message for no paths */
+.dashboard-content p {
+  color: #555;
 }

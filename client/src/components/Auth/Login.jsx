@@ -6,7 +6,7 @@ import "../../styles/Auth.css"; // Make sure this path is correct
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // Get the login function
+  const { login } = useContext(AuthContext); // Get the login function from context
 
   const [form, setForm] = useState({
     email: "",
@@ -29,22 +29,30 @@ const Login = () => {
       // 1. Send login request to backend
       const res = await API.post("/auth/login", form);
 
-      // 2. Call the login function from AuthContext
-      // res.data is { token: "...", user: { ... } }
-      login(res.data);
+      // 2. Call the login function from AuthContext to save user data
+      // Ensure your context's login function expects { token: '...', user: {...} }
+      login(res.data); 
 
-      // 3. --- THIS IS THE FIX ---
-      // Navigate to the correct dashboard based on the user's role
+      // 3. --- THIS IS THE UPDATED NAVIGATION LOGIC ---
       setMessage("Login successful! Redirecting...");
-      if (res.data.user.role === "creator") {
+      
+      // Get the role from the response data
+      const userRole = res.data.user.role; 
+      
+      // Navigate based on the user's role
+      if (userRole === "creator") {
         navigate("/Dashboard/CreatorDashboard");
-      } else {
-        navigate("/Dashboard/LearnerDashboard");
+      } else if (userRole === "admin") { 
+        navigate("/admin"); // Navigate admins to /admin
+      } else { 
+        // Default to learner dashboard for any other role (or if role is missing)
+        navigate("/Dashboard/LearnerDashboard"); 
       }
+      // --- END OF UPDATED LOGIC ---
 
     } catch (err) {
-      console.log(err);
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      console.error("Login Error:", err.response || err); // Log the full error
+      setError(err.response?.data?.message || "Login failed. Please check credentials.");
     }
   };
 
