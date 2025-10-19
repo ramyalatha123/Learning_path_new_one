@@ -68,15 +68,18 @@ A web application that allows users to create, manage, and follow learning paths
 
 > Add your screenshots here. Example:
 
-![Login Page](Screenshot 2025-10-19 153911.png)
-![Creator Dashboard](./assets/screenshots/creator-dashboard.png)
-![Learner Dashboard](./assets/screenshots/learner-dashboard.png)
+![Login Page](./assets/screenshots/landpage.png)
+![Creator Dashboard](./assets/ScreenShots/Creatorpath.png)
+![Learner Dashboard](./assets/ScreenShots/Learnerpath.png)
+![Admin Dashboard](./assets/ScreenShots/Arjun.png)
+![Progress](./assets/ScreenShots/Progress)
+
 
 ---
 
 ## Deployment
 
-### Using Docker (Recommended)
+### Using Docker
 
 1. Ensure **Docker** and **Docker Compose** are installed.
 2. Navigate to project root directory:
