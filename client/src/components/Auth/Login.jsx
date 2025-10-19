@@ -1,78 +1,87 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../../api";
-import { AuthContext } from "../../context/AuthContext";
-import "../../styles/Auth.css"; 
-
+import { useNavigate, Link } from "react-router-dom";
+import API from "../../api"; // Make sure this path is correct
+import { AuthContext } from "../../context/AuthContext"; // Make sure this path is correct
+import "../../styles/Auth.css"; // Make sure this path is correct
 
 const Login = () => {
-  const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // Get the login function
 
-  const submit = async (e) => {
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErr(""); // clear previous errors
-
-    // 1️⃣ Log the input values
-    console.log("Submitting login:", { email, password });
-
-    // 2️⃣ Basic validation
-    if (!email || !password) {
-      setErr("Email and password are required.");
-      return;
-    }
+    setMessage("");
+    setError("");
 
     try {
-      const res = await API.post("/auth/login", { email, password });
-      
-      // 3️⃣ Log full response
-      console.log("Login response:", res.data);
+      // 1. Send login request to backend
+      const res = await API.post("/auth/login", form);
 
-      // 4️⃣ Store user and token
+      // 2. Call the login function from AuthContext
+      // res.data is { token: "...", user: { ... } }
       login(res.data);
 
-      // 5️⃣ Navigate based on role (absolute paths)
-      if (res.data.role === "creator") navigate("/Dashboard/CreatorDashboard");
-      else if (res.data.role === "learner") navigate("/Dashboard/LearnerDashboard");
-      else navigate("/");
+      // 3. --- THIS IS THE FIX ---
+      // Navigate to the correct dashboard based on the user's role
+      setMessage("Login successful! Redirecting...");
+      if (res.data.user.role === "creator") {
+        navigate("/Dashboard/CreatorDashboard");
+      } else {
+        navigate("/Dashboard/LearnerDashboard");
+      }
 
-    } catch (error) {
-      // 6️⃣ Full error logging
-      console.error("Login error full response:", error.response);
-
-      // 7️⃣ Extract message safely
-      const message =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        "Login failed";
-      setErr(message);
+    } catch (err) {
+      console.log(err);
+      setError(err.response?.data?.message || "Login failed. Please try again.");
     }
   };
 
   return (
     <div className="auth-container">
-      <h2>Login</h2>
-      <form onSubmit={submit}>
+      <h2>Login to Your Account</h2>
+
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          value={form.email}
+          onChange={handleChange}
           required
         />
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
+          value={form.password}
+          onChange={handleChange}
           required
         />
+
         <button type="submit">Login</button>
-        {err && <p style={{ color: "red" }}>{err}</p>}
+
+        {message && <p className="success-msg">{message}</p>}
+        {error && <p className="error-msg">{error}</p>}
       </form>
+
+      <p>
+        Don't have an account?{" "}
+        <Link to="/signup" className="link">
+          Sign up here
+        </Link>
+      </p>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../db'); // Notice '../' to go up one folder
+const { pool } = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -11,7 +11,8 @@ router.post('/signup', async (req, res) => {
     const { name, email, password, role } = req.body;
 
     // 1. Check if user already exists
-    const user = await pool.query('SELECT * FROM Users WHERE email = $1', [email]);
+    // FIX: Use lowercase 'users' table
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (user.rows.length > 0) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -20,25 +21,34 @@ router.post('/signup', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // 3. Insert new user into database with dynamic role
+    // 3. Insert new user into database
+    // FIX: Use lowercase 'users' table
+    const userRole = role || 'learner';
     const newUser = await pool.query(
-      'INSERT INTO Users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, email, passwordHash, role || 'learner'] // default to learner if role missing
+      'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, email, passwordHash, userRole]
     );
 
-    // 4. Create JWT token
+    // 4. Create a JWT token
     const token = jwt.sign(
-      { id: newUser.rows[0].id, role: newUser.rows[0].role },
+      { 
+        id: newUser.rows[0].id, 
+        role: newUser.rows[0].role,
+        name: newUser.rows[0].name // Add name here
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // 5. Send response with token and user info
-    res.json({
+    // 5. Send token AND user info back (for AuthContext)
+    res.status(201).json({
       token,
-      role: newUser.rows[0].role,
-      id: newUser.rows[0].id,
-      email: newUser.rows[0].email
+      user: {
+        id: newUser.rows[0].id,
+        email: newUser.rows[0].email,
+        name: newUser.rows[0].name,
+        role: newUser.rows[0].role
+      }
     });
 
   } catch (err) {
@@ -47,9 +57,6 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-
-// === 2. LOGIN A USER ===
-// (POST /api/auth/login)
 // === 2. LOGIN A USER ===
 // (POST /api/auth/login)
 router.post('/login', async (req, res) => {
@@ -57,32 +64,38 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // 1. Check if user exists
-    const userQuery = await pool.query('SELECT * FROM Users WHERE email = $1', [email]);
-    if (userQuery.rows.length === 0) {
+    // FIX: Use lowercase 'users' table
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user.rows.length === 0) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const user = userQuery.rows[0];
-
     // 2. Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    const isMatch = await bcrypt.compare(password, user.rows[0].password_hash);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Create JWT token
+    // 3. Create and send token (with name)
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { 
+        id: user.rows[0].id, 
+        role: user.rows[0].role,
+        name: user.rows[0].name // This is correct
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // 4. Send back token + user info
+    // 4. Send token AND user info back (for AuthContext)
     res.json({
       token,
-      role: user.role,
-      id: user.id,
-      email: user.email
+      user: {
+        id: user.rows[0].id,
+        email: user.rows[0].email,
+        name: user.rows[0].name,
+        role: user.rows[0].role
+      }
     });
 
   } catch (err) {
@@ -91,5 +104,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-module.exports = router; // Export the router
+module.exports = router;

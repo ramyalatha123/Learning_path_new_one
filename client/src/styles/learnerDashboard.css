@@ -1,88 +1,94 @@
+/* --- Page Setup --- */
 .learner-dashboard {
-  padding: 20px;
+  padding: 2rem;
   font-family: 'Poppins', sans-serif;
+  background-color: #f7f9fa; /* Light grey page background */
+}
+
+h2 {
+  text-align: center;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2rem;
 }
 
 .paths-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
+  justify-content: center;
 }
 
+/* --- Card: This is the main fix --- */
 .path-card {
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 300px;
   overflow: hidden;
-  transition: transform 0.3s;
+  transition: all 0.3s ease;
+  
+  /* === FLEXBOX FIX FOR EQUAL HEIGHTS === */
+  display: flex;
+  flex-direction: column; 
 }
 
 .path-card:hover {
-  transform: scale(1.03);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .path-header {
   cursor: pointer;
+  /* This part is just a container, no extra styles needed */
 }
 
+/* --- Image: This is the image fix --- */
 .path-image {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  height: 170px;         /* ✅ Set a fixed height */
+  object-fit: cover;      /* ✅ Fill the box, cropping sides if needed */
+  object-position: top;   /* ✅ Show the top of the image */
+  background-color: #f0f0f0; /* Fallback color */
+  display: block;
 }
 
+/* --- Info: This is the equal height fix --- */
 .path-info {
-  padding: 15px;
+  padding: 1rem;
+  
+  /* ✅ This makes the text area grow */
+  flex-grow: 1; 
 }
 
-.resources-list {
-  list-style: none;
-  padding: 15px;
-  border-top: 1px solid #eee;
+.path-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0; /* Title styling */
 }
 
-.resource-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.path-info p {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0 0 1rem 0; /* Description styling */
+  /* This will grow and push the progress bar down */
+  flex-grow: 1; 
 }
 
-.resource-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.continue-btn {
-  padding: 5px 10px;
-  background: #2196f3;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 5px;
-}
-
-.complete-btn {
-  padding: 5px 10px;
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.completed-label {
-  font-weight: bold;
-  color: green;
-}
-
+/* --- Buttons --- */
 .register-btn, .certificate-btn {
-  margin: 10px 15px;
-  padding: 8px 15px;
-  width: calc(100% - 30px);
+  /* These buttons are at the bottom of the card */
+  display: block; /* Make them full-width */
+  padding: 10px 15px;
+  margin: 0 1rem 1rem 1rem; /* Add margin to match info padding */
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: background-color 0.2s;
 }
 
 .register-btn {
@@ -93,4 +99,53 @@
 .certificate-btn {
   background: #9c27b0;
   color: #fff;
+}
+
+/* --- Resources List (when expanded) --- */
+.resources-list {
+  list-style: none;
+  padding: 0 1rem 1rem 1rem;
+  margin: 0;
+  border-top: 1px solid #eee;
+}
+
+.resource-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+.resource-item:last-child {
+  border-bottom: none;
+}
+
+.resource-buttons {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.continue-btn {
+  padding: 5px 10px;
+  background: #2196f3;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+.complete-btn {
+  padding: 5px 10px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.completed-label {
+  font-weight: bold;
+  color: green;
+  font-size: 0.8rem;
 }

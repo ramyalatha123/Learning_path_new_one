@@ -1,77 +1,110 @@
 const express = require("express");
 const router = express.Router();
-const { pool } = require("../db"); // PostgreSQL pool
-const { verifyToken } = require("../middleware/auth"); // JWT middleware
+const { pool } = require("../db");
+const verifyToken = require("../middleware/auth");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Configure multer to store images in public/assets
+// ... (your existing multer storage config is fine) ...
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = path.join(__dirname, "../public/assets");
-    // Create directory if it doesn't exist
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
     cb(null, dir);
   },
   filename: function (req, file, cb) {
-    // Save file with timestamp to avoid duplicates
     const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+    cb(null, "image-" + uniqueSuffix); // Changed filename slightly
   },
 });
-
 const upload = multer({ storage: storage });
 
-// Create Learning Path with image and resources
+
+// --- UPDATED ROUTE: Create Learning Path (with Quizzes) ---
 router.post(
   "/learning-paths",
   verifyToken,
-  upload.single("image"), // handle single image upload
+  upload.single("image"), 
   async (req, res) => {
+    // Use a DB transaction to make sure everything saves, or nothing
+    const client = await pool.connect(); 
     try {
+      await client.query('BEGIN'); // Start transaction
+
       const userId = req.user.id;
       const { title, resources } = req.body;
+      let image_url = null;
 
       if (!title || !resources) {
         return res.status(400).json({ message: "Title and resources are required" });
       }
-
-      const parsedResources = JSON.parse(resources);
-
-      if (!Array.isArray(parsedResources) || parsedResources.length === 0) {
-        return res.status(400).json({ message: "At least one resource is required" });
-      }
-
-      // Save image URL
-      let image_url = null;
       if (req.file) {
         image_url = `/assets/${req.file.filename}`;
       } else {
         return res.status(400).json({ message: "Image is required" });
       }
 
-      // Insert Learning Path into database
-      const pathResult = await pool.query(
+      const parsedResources = JSON.parse(resources);
+
+      // 1. Insert Learning Path
+      const pathResult = await client.query(
         "INSERT INTO LearningPaths (creator_id, title, image_url) VALUES ($1, $2, $3) RETURNING id",
         [userId, title, image_url]
       );
       const pathId = pathResult.rows[0].id;
 
-      // Insert resources
+      // 2. Loop and insert all resources
       for (const r of parsedResources) {
-        await pool.query(
-          "INSERT INTO Resources (path_id, title, url, description, estimated_time) VALUES ($1, $2, $3, $4, $5)",
-          [pathId, r.title, r.url, r.description || "", r.estimatedTime || 0]
+        // Insert the resource (Video, Article, or Quiz)
+        const resourceResult = await client.query(
+          `INSERT INTO Resources (path_id, title, type, url, description, estimated_time) 
+           VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+          [
+            pathId,
+            r.title,
+            r.type,
+            r.url || null, // URL is null for quizzes
+            r.description || "",
+            r.estimatedTime || 0
+          ]
         );
+        const resourceId = resourceResult.rows[0].id;
+
+        // --- NEW QUIZ LOGIC ---
+        // If the resource is a quiz, insert its questions and options
+        if (r.type === 'quiz' && r.questions) {
+          for (const q of r.questions) {
+            // Insert Question
+            const questionResult = await client.query(
+              'INSERT INTO Questions (resource_id, question_text) VALUES ($1, $2) RETURNING id',
+              [resourceId, q.text]
+            );
+            const questionId = questionResult.rows[0].id;
+
+            // Insert Options
+            for (const o of q.options) {
+              await client.query(
+                'INSERT INTO Options (question_id, option_text, is_correct) VALUES ($1, $2, $3)',
+                [questionId, o.text, o.isCorrect]
+              );
+            }
+          }
+        }
+        // --- END QUIZ LOGIC ---
       }
 
-      res.json({ message: "Learning Path created successfully", pathId });
+      await client.query('COMMIT'); // Commit transaction
+      res.status(201).json({ message: "Learning Path created successfully", pathId });
+
     } catch (err) {
-      console.error(err);
+      await client.query('ROLLBACK'); // Rollback on error
+      console.error("Error creating learning path:", err);
       res.status(500).json({ message: "Server Error" });
+    } finally {
+      client.release(); // Release client back to pool
     }
   }
 );
