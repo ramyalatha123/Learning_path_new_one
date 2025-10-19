@@ -68,7 +68,7 @@ A web application that allows users to create, manage, and follow learning paths
 
 > Add your screenshots here. Example:
 
-![Login Page](./assets/screenshots/login.png)
+![Login Page](Screenshot 2025-10-19 153911.png)
 ![Creator Dashboard](./assets/screenshots/creator-dashboard.png)
 ![Learner Dashboard](./assets/screenshots/learner-dashboard.png)
 
