@@ -205,3 +205,11 @@ body {
     border-radius: 4px;
     transition: none; /* No hover effects */
 }
+
+.progress-bar-fill {
+  height: 100%; /* Or fixed height like 10px */
+  background-color: #4caf50; 
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
+  /* NO 'width: ...' property here! */
+}

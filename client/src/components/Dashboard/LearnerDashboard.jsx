@@ -49,11 +49,11 @@ const LearnerDashboard = () => {
     <div 
       key={path.id} 
       className={`path-card ${isResumeCard ? 'resume-card' : ''}`}
-      onClick={() => navigate(`/path/${path.id}`)} 
+      onClick={() => navigate(`/path/view/${path.id}`)} 
     >
       <div className="path-header">
         <img
-          src={path.image_url ? path.image_url : '/assets/default_course.png'}
+          src={path.image_url ? `http://localhost:5000${path.image_url}` : '/assets/default_course.png'}
           alt={path.title}
           className="path-image"
         />

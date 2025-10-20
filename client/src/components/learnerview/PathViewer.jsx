@@ -46,34 +46,41 @@ const PathViewer = () => {
     // --- END fetchPath FUNCTION ---
 
     // The completion function should not run in preview mode, but we will protect it in the render logic
-    const completeResource = async (resourceId) => {
-        if (isPreviewMode) {
-            alert("Cannot mark resources complete in Preview Mode.");
-            return;
-        }
-        try {
-            console.log("Attempting to complete resource:", resourceId); 
-            await API.post(`/learner/complete-resource/${resourceId}`);
-            console.log("Resource completion successful, updating state..."); 
+    // Replace the existing completeResource function in PathViewer.jsx
 
-            // Update the state locally for immediate feedback
-            setPath(prevPath => {
-                if (!prevPath) return null; 
-                const updatedResources = prevPath.resources.map(r =>
-                    r.id === resourceId ? { ...r, completed: true } : r
-                );
-                 const newCompletedCount = updatedResources.filter(r => r.completed).length;
-                 const newTotalCount = updatedResources.length;
-                 const newProgress = newTotalCount > 0 ? Math.round((newCompletedCount / newTotalCount) * 100) : 0;
-                 console.log("New Progress:", newProgress); 
+    // Inside completeResource function in PathViewer.jsx
 
-                return { ...prevPath, resources: updatedResources };
-            });
+    const completeResource = async (resourceId) => {
+        try {
+            console.log(`[PathViewer] Attempting to complete resource: ${resourceId}`);
+            await API.post(`/learner/complete-resource/${resourceId}`);
+            console.log(`[PathViewer] Resource ${resourceId} marked complete on backend.`);
 
-        } catch (err) {
-            console.error("Error completing resource:", err.response || err); 
-        }
-    };
+            // --- UPDATE STATE AND FORCE PROGRESS RECALCULATION ---
+            setPath(prevPath => {
+                if (!prevPath) return null;
+
+                const updatedResources = prevPath.resources.map(r =>
+                    r.id === resourceId ? { ...r, completed: true } : r
+                );
+
+                // --- Recalculate progress INSIDE the state update ---
+                const newCompletedCount = updatedResources.filter(r => r.completed).length;
+                const newTotalCount = updatedResources.length;
+                const newProgress = newTotalCount > 0 ? Math.round((newCompletedCount / newTotalCount) * 100) : 0;
+                console.log(`[PathViewer] SETTING State. New progress should be: ${newProgress}%`);
+                // ---
+
+                // Return the updated path object for the state
+                // We still don't store progress on the path object itself
+                return { ...prevPath, resources: updatedResources };
+            });
+            // --- END STATE UPDATE ---
+
+        } catch (err) {
+            console.error("[PathViewer] Error completing resource:", err.response || err);
+        }
+    };
     // --- END completeResource FUNCTION ---
 
     // Fetch data when component mounts or pathId changes
@@ -113,6 +120,9 @@ const PathViewer = () => {
                 {!isPreviewMode && (
                     <>
                         <div className="progress-bar-container">
+  {/* --- ADD THIS LOG --- */}
+              {console.log("Rendering bar with progress:", progress)} 
+              {/* --- END ADD --- */}
                             <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
                         </div>
                         <p className="progress-text">{progress}% Complete</p>

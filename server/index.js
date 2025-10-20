@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
+const path = require('path');
 // Initialize the app
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,7 +11,7 @@ const { createTables } = require('./db');
 app.use(cors()); 
 // Allow the server to read JSON from request bodies
 app.use(express.json()); 
-
+app.use(express.static(path.join(__dirname, 'public')));
 createTables(); // <-- 1. ADD THIS LINE HERE
 
 // --- Test Route ---
