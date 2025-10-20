@@ -19,7 +19,7 @@ RUN npm ci --only=production
 
 # Option B (Simpler): Copy directly into /app
 WORKDIR /app # Stay in /app
-COPY server/. . # Copy server contents directly into /app
+COPY . . # Copy server contents directly into /app
 
 # 6. Expose the port
 EXPOSE 5000
