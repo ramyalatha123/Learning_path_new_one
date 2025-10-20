@@ -49,9 +49,9 @@ function App() {
       />
 
       <Route
-        path="/path/:pathId"
+        path="/path/view/:pathId"
         element={
-          <ProtectedRoute roles={["learner"]}>
+          <ProtectedRoute roles={["learner","creator"]}>
             <PathViewer />
           </ProtectedRoute>
         }

@@ -41,38 +41,38 @@ router.get("/learning-paths", authMiddleware, async (req, res) => {
 });
 
 // GET /api/learner/path/:pathId (Includes DEBUG LOGS)
-router.get("/path/:pathId", authMiddleware, async (req, res) => {
-  const { pathId } = req.params;
-  const { id: userId } = req.user;
-  console.log(`--- Handling GET /path/${pathId} for user ${userId} ---`);
-  try {
-    console.log("[LOG] Fetching path details from LearningPaths table...");
-    const pathResult = await pool.query( "SELECT * FROM LearningPaths WHERE id = $1", [pathId] );
-    console.log(`[LOG] Path query result rows: ${pathResult.rows.length}`);
-    if (pathResult.rows.length === 0) {
-      console.log(`[LOG] Path with ID ${pathId} not found. Sending 404.`);
-      return res.status(404).json({ message: "Path not found" });
-    }
-    const path = pathResult.rows[0];
-    console.log(`[LOG] Path found: ${path.title} (ID: ${path.id})`);
-    console.log(`[LOG] Fetching resources for path ID ${pathId}...`);
-    const resourcesResult = await pool.query(
-      `SELECT r.*, p.completed AS is_completed
-       FROM Resources r
-       LEFT JOIN LearnerProgress p ON r.id = p.resource_id AND p.learner_id = $1
-       WHERE r.path_id = $2
-       ORDER BY r."order" ASC, r.id ASC`,
-      [userId, pathId]
-    );
-    console.log(`[LOG] Resources query result rows: ${resourcesResult.rows.length}`);
-    path.resources = resourcesResult.rows.map(r => ({ ...r, completed: !!r.is_completed }));
-    console.log("[LOG] Sending final path object with resources to frontend.");
-    res.json(path);
-  } catch (err) {
-    console.error(`!!! ERROR in GET /path/${pathId}:`, err.message, err.stack);
-    res.status(500).send("Server Error");
-  }
-});
+// router.get("/path/:pathId", authMiddleware, async (req, res) => {
+//   const { pathId } = req.params;
+//   const { id: userId } = req.user;
+//   console.log(`--- Handling GET /path/${pathId} for user ${userId} ---`);
+//   try {
+//     console.log("[LOG] Fetching path details from LearningPaths table...");
+//     const pathResult = await pool.query( "SELECT * FROM LearningPaths WHERE id = $1", [pathId] );
+//     console.log(`[LOG] Path query result rows: ${pathResult.rows.length}`);
+//     if (pathResult.rows.length === 0) {
+//       console.log(`[LOG] Path with ID ${pathId} not found. Sending 404.`);
+//       return res.status(404).json({ message: "Path not found" });
+//     }
+//     const path = pathResult.rows[0];
+//     console.log(`[LOG] Path found: ${path.title} (ID: ${path.id})`);
+//     console.log(`[LOG] Fetching resources for path ID ${pathId}...`);
+//     const resourcesResult = await pool.query(
+//       `SELECT r.*, p.completed AS is_completed
+//        FROM Resources r
+//        LEFT JOIN LearnerProgress p ON r.id = p.resource_id AND p.learner_id = $1
+//        WHERE r.path_id = $2
+//        ORDER BY r."order" ASC, r.id ASC`,
+//       [userId, pathId]
+//     );
+//     console.log(`[LOG] Resources query result rows: ${resourcesResult.rows.length}`);
+//     path.resources = resourcesResult.rows.map(r => ({ ...r, completed: !!r.is_completed }));
+//     console.log("[LOG] Sending final path object with resources to frontend.");
+//     res.json(path);
+//   } catch (err) {
+//     console.error(`!!! ERROR in GET /path/${pathId}:`, err.message, err.stack);
+//     res.status(500).send("Server Error");
+//   }
+// });
 
 // POST /api/learner/register-path (Keep existing code)
 router.post("/register-path", authMiddleware, async (req, res) => {

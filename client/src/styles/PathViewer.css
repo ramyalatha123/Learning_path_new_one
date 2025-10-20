@@ -182,3 +182,26 @@ body {
   padding: 6px 12px; /* Match button padding */
   display: inline-block; /* Allow padding */
 }
+/* --- Preview Mode Styles --- */
+.preview-mode-banner {
+    background-color: #ffc107; /* Yellow/Amber background */
+    color: #333;
+    padding: 10px 20px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #e0a800;
+}
+
+/* Style for disabled buttons in preview mode */
+.btn-disabled {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    background-color: #e0e0e0; /* Gray out */
+    color: #6c757d;
+    border: 1px solid #ccc;
+    cursor: not-allowed;
+    border-radius: 4px;
+    transition: none; /* No hover effects */
+}

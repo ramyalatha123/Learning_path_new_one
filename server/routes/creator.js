@@ -210,5 +210,22 @@ router.put('/paths/:pathId/visibility', verifyToken, async (req, res) => {
         res.json({ message: `Path visibility updated successfully to ${is_public ? 'public' : 'private'}.` });
     } catch (err) { console.error("Error updating path visibility:", err); res.status(500).json({ message: 'Server Error' }); }
 });
+router.get("/mypaths", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Fetch paths created by this user
+        const result = await pool.query(
+            `SELECT * FROM LearningPaths WHERE creator_id = $1 ORDER BY id DESC`,
+            [userId]
+        );
 
+        // This list includes ALL paths, private or public, since the creator is requesting their own list.
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error("Error fetching creator's paths:", err);
+        res.status(500).json({ message: "Server Error fetching your paths." });
+    }
+});
 module.exports = router;
