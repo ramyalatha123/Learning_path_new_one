@@ -37,65 +37,56 @@ router.post("/upload-file", verifyToken, upload.single("file"), async (req, res)
 });
 
 
-// --- Simplified TEST Route: Create Learning Path ---
+// --- CORRECTED Route: Create Learning Path ---
 router.post(
   "/learning-paths",
-  // verifyToken, // <-- Temporarily comment out authentication
+  verifyToken, // <-- UNCOMMENTED Authentication
   upload.single("image"), // Keep multer middleware
   async (req, res) => {
-    // --- SIMPLIFIED TEST HANDLER ---
-    console.log("--- TEST: Request Received ---");
-    console.log("TEST File:", req.file); // Log the file multer found
-    console.log("TEST Body:", req.body); // Log the text fields multer found
+    // --- DEBUG LOGS ---
+    console.log("--- Request Received for POST /learning-paths ---");
+    console.log("Multer processed file:", req.file); // Log the file info
+    console.log("Multer processed body:", req.body); // Log the text fields
+    // --- END OF DEBUG LOGS ---
 
-    // Send a response directly back to the frontend
-    if (req.file && req.body && req.body.title) {
-      // If we got file and title, it worked!
-      res.status(200).json({
-        message: "TEST OK: Multer received file and body.",
-        fileName: req.file.filename,
-        title: req.body.title,
-        resources: req.body.resources, // Log resources string if received
-        bodyReceived: req.body // Send back the whole body
-      });
-    } else {
-      // If something is missing, send an error
-      res.status(400).json({
-        message: "TEST FAILED: Multer did not receive file or body correctly.",
-        fileReceived: !!req.file, // true or false
-        bodyReceived: req.body,   // Log what was received (likely {} or undefined)
-      });
-    }
-    // --- END OF SIMPLIFIED TEST ---
-
-    /* --- Temporarily comment out ALL your original database logic ---
-
+    // --- Start Database Logic ---
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
-        const userId = req.user.id; // This would fail if verifyToken is commented out
+        const userId = req.user.id; // Get user ID from token
 
+        // --- SAFETY CHECK for req.body ---
         if (!req.body) {
             console.error("!!! req.body is undefined AFTER multer processing !!!");
-            if (client) await client.query('ROLLBACK');
+            await client.query('ROLLBACK'); // Rollback before returning error
             return res.status(400).json({ message: "Form data (title, resources) missing or invalid." });
         }
+        // --- END SAFETY CHECK ---
 
+        // Attempt to destructure
         const { title, resources } = req.body;
+
+        // --- LOGS AFTER DESTRUCTURING ---
         console.log("[LOG] Extracted title:", title);
         console.log("[LOG] Extracted resources string:", resources);
+        // ---
 
         let image_url = null;
+
+        // --- CHECKS AFTER DESTRUCTURING ---
         if (!title || !resources) {
             console.error("!!! Title or resources missing AFTER destructuring !!!");
-            if (client) await client.query('ROLLBACK');
+            await client.query('ROLLBACK');
             return res.status(400).json({ message: "Title and resources are required" });
         }
+        // ---
+
         if (req.file) {
             image_url = `/assets/${req.file.filename}`;
+            console.log("[LOG] Image file received:", image_url);
         } else {
              console.error("!!! Image file missing !!!");
-             if (client) await client.query('ROLLBACK');
+             await client.query('ROLLBACK');
             return res.status(400).json({ message: "Image is required" });
         }
 
@@ -103,45 +94,70 @@ router.post(
         try {
             parsedResources = JSON.parse(resources);
             console.log("[LOG] Successfully parsed resources JSON.");
+            if (!Array.isArray(parsedResources)) throw new Error("Resources is not an array.");
         } catch (parseError) {
              console.error("!!! Error parsing resources JSON:", parseError.message);
-             if (client) await client.query('ROLLBACK');
+             await client.query('ROLLBACK');
              return res.status(400).json({ message: "Invalid format for resources data." });
         }
 
+        // 1️⃣ Insert Learning Path
         console.log("[LOG] Inserting into LearningPaths...");
         const pathResult = await client.query(
-            `INSERT INTO LearningPaths (creator_id, title, image_url) VALUES ($1, $2, $3) RETURNING id`,
-            [userId, title, image_url]
+            `INSERT INTO LearningPaths (creator_id, title, image_url, is_public) VALUES ($1, $2, $3, $4) RETURNING id`, // Added is_public (default true)
+            [userId, title, image_url, true] // Assuming new paths start as public
         );
         const pathId = pathResult.rows[0].id;
         console.log(`[LOG] Inserted Learning Path with ID: ${pathId}`);
 
+        // 2️⃣ Insert each Resource with "order"
         console.log(`[LOG] Looping through ${parsedResources.length} resources to insert...`);
         for (let i = 0; i < parsedResources.length; i++) {
             const r = parsedResources[i];
+             // Make sure resource object is valid
+             if (!r || typeof r !== 'object' || !r.title || !r.type) {
+                console.error(`!!! Invalid resource object at index ${i}:`, r);
+                throw new Error(`Invalid resource data at index ${i}.`); // Cause rollback
+             }
             console.log(`[LOG] Inserting resource ${i + 1}: "${r.title}" (Type: ${r.type}, Order: ${r.order ?? i})`);
             const resourceResult = await client.query(
                 `INSERT INTO Resources (path_id, title, type, url, description, estimated_time, "order")
                  VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-                [ pathId, r.title, r.type, r.url || null, r.description || "", r.estimated_time || 0, r.order ?? i ]
+                [ pathId, r.title, r.type, r.url || null, r.description || "", r.estimated_time || 0, r.order ?? i ] // Use provided order or index
             );
             const resourceId = resourceResult.rows[0].id;
             console.log(`[LOG] Inserted resource with ID: ${resourceId}`);
 
-            if (r.type === "quiz" && r.questions && r.questions.length > 0) {
+            // 3️⃣ Handle Quiz Resources
+            if (r.type === "quiz" && r.questions && Array.isArray(r.questions) && r.questions.length > 0) {
                  console.log(`[LOG] Processing ${r.questions.length} questions for quiz resource ID: ${resourceId}`);
                 for (const q of r.questions) {
+                     if (!q || !q.text || !Array.isArray(q.options)) {
+                         console.error(`!!! Invalid question object for resource ${resourceId}:`, q);
+                         throw new Error(`Invalid question data for resource ${resourceId}.`); // Cause rollback
+                     }
                     const questionResult = await client.query('INSERT INTO Questions (resource_id, question_text) VALUES ($1, $2) RETURNING id', [resourceId, q.text]);
                     const questionId = questionResult.rows[0].id;
-                     console.log(`[LOG] Inserted question with ID: ${questionId}`);
+                    console.log(`[LOG] Inserted question with ID: ${questionId}`);
+                    let correctOptionExists = false;
                     for (const o of q.options) {
+                         if (!o || typeof o.text === 'undefined' || typeof o.isCorrect === 'undefined') {
+                             console.error(`!!! Invalid option object for question ${questionId}:`, o);
+                             throw new Error(`Invalid option data for question ${questionId}.`); // Cause rollback
+                         }
+                         if (o.isCorrect === true) correctOptionExists = true;
                         await client.query('INSERT INTO Options (question_id, option_text, is_correct) VALUES ($1, $2, $3)', [questionId, o.text, o.isCorrect]);
                     }
-                     console.log(`[LOG] Inserted ${q.options.length} options for question ID: ${questionId}`);
+                     if (!correctOptionExists && q.options.length > 0) {
+                         console.error(`!!! No correct option provided for question ${questionId}`);
+                         throw new Error(`Question ID ${questionId} must have at least one correct option.`); // Cause rollback
+                     }
+                    console.log(`[LOG] Inserted ${q.options.length} options for question ID: ${questionId}`);
                 }
             } else if (r.type === "quiz") {
-                console.log(`[LOG] Quiz resource ID: ${resourceId} has no questions.`);
+                console.log(`[LOG] Quiz resource ID: ${resourceId} has no questions or invalid questions array.`);
+                // Decide if a quiz resource MUST have questions - if so, throw error here
+                // throw new Error(`Quiz resource ID ${resourceId} must contain questions.`);
             }
         }
 
@@ -151,31 +167,48 @@ router.post(
         res.status(201).json({ message: "Learning Path created successfully", pathId });
 
     } catch (err) {
-        console.error("!!! Error during path creation transaction:", err.message, err.stack);
+        console.error("!!! Error during path creation transaction:", err.message, err.stack); // Log full error stack
         if (client) {
              console.log("[LOG] Rolling back transaction due to error...");
              await client.query("ROLLBACK");
              console.log("[LOG] Transaction rolled back.");
         }
-        res.status(500).json({ message: "Server Error" });
+        // Send a more specific error message if possible
+        res.status(500).json({ message: err.message || "Server Error creating path." });
     } finally {
         if (client) {
              console.log("[LOG] Releasing database client.");
              client.release();
         }
     }
-    */
   }
 );
 
 // --- Update Resource Order (Keep existing code) ---
 router.put("/resources/reorder", verifyToken, async (req, res) => {
-    // ... (Your reorder logic here) ...
+    const { orderedResources } = req.body;
+    if (!Array.isArray(orderedResources)) return res.status(400).json({ message: "Invalid data format." });
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        for (const resource of orderedResources) { await client.query('UPDATE Resources SET "order" = $1 WHERE id = $2', [ resource.order, resource.id ]); }
+        await client.query("COMMIT");
+        res.json({ message: "Resource order updated successfully." });
+    } catch (err) { await client.query("ROLLBACK"); console.error("Error reordering resources:", err); res.status(500).json({ message: "Server Error updating order." }); }
+    finally { client.release(); }
 });
 
 // --- Toggle Visibility (Keep existing code) ---
 router.put('/paths/:pathId/visibility', verifyToken, async (req, res) => {
-    // ... (Your visibility toggle logic here) ...
+    const { pathId } = req.params; const { is_public } = req.body; const userId = req.user.id;
+    if (typeof is_public !== 'boolean') return res.status(400).json({ message: 'Invalid value for is_public.' });
+    try {
+        const pathCheck = await pool.query( 'SELECT creator_id FROM LearningPaths WHERE id = $1', [pathId] );
+        if (pathCheck.rows.length === 0) return res.status(404).json({ message: 'Learning Path not found.' });
+        if (pathCheck.rows[0].creator_id !== userId) return res.status(403).json({ message: 'Access denied.' });
+        await pool.query( 'UPDATE LearningPaths SET is_public = $1 WHERE id = $2', [is_public, pathId] );
+        res.json({ message: `Path visibility updated successfully to ${is_public ? 'public' : 'private'}.` });
+    } catch (err) { console.error("Error updating path visibility:", err); res.status(500).json({ message: 'Server Error' }); }
 });
 
 module.exports = router;

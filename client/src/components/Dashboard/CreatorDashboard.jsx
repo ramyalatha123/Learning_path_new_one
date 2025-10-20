@@ -88,13 +88,28 @@ const CreateDashboard = () => {
 
      // --- Path Visibility Toggle ---
      const handleToggleVisibility = async (pathId, currentVisibility) => {
-         const newVisibility = !currentVisibility;
-         try {
-             setPathMessage(''); setPathError('');
-             await API.put(`/creator/paths/${pathId}/visibility`, { is_public: newVisibility });
-             setMyPaths(prevPaths => prevPaths.map(p => p.id === pathId ? { ...p, is_public: newVisibility } : p));
-             setPathMessage(`Path set to ${newVisibility ? 'Public' : 'Private'}`);
-         } catch (err) { console.error("Error updating path visibility:", err); setPathError(err.response?.data?.message || 'Failed update'); }
+        const newVisibility = !currentVisibility;
+        console.log(`[FRONTEND] Toggling path ${pathId} to ${newVisibility ? 'Public' : 'Private'}`); // <-- ADD LOG
+        try {
+            setPathMessage('');
+            setPathError('');
+            console.log(`[FRONTEND] Sending PUT request to /creator/paths/${pathId}/visibility`); // <-- ADD LOG
+            const res = await API.put(`/creator/paths/${pathId}/visibility`, { is_public: newVisibility });
+            console.log("[FRONTEND] API Response:", res.data); // <-- ADD LOG
+
+            // Update state
+            setMyPaths(prevPaths =>
+                prevPaths.map(p =>
+                    p.id === pathId ? { ...p, is_public: newVisibility } : p
+                )
+            );
+            console.log("[FRONTEND] State updated locally."); // <-- ADD LOG
+            setPathMessage(`Path set to ${newVisibility ? 'Public' : 'Private'}`);
+
+        } catch (err) {
+             console.error("[FRONTEND] Error updating path visibility:", err.response || err); // <-- UPDATED LOG
+             setPathError(err.response?.data?.message || 'Failed to update visibility.');
+        }
     };
 
     // --- Submit Path ---

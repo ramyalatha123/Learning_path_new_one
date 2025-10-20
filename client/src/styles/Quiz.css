@@ -1,54 +1,109 @@
 /* --- Styles for Quiz.jsx --- */
-.quiz-container {
-  max-width: 700px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+/* Ensure body doesn't interfere */
+body {
+  font-family: 'Poppins', sans-serif; /* Consistent font */
+  background-color: #f7f9fa;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scrolling */
 }
 
-.quiz-question {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #eee;
+/* --- Main Flex Layout --- */
+.quiz-layout {
+  display: flex;
+  flex-direction: column; /* Stack header and content */
+  height: 100vh; /* Fill screen */
+  background-color: #f7f9fa;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent this container scrolling */
 }
-.quiz-question:last-child {
+
+/* --- Header Section (Non-Scrollable) --- */
+.quiz-header {
+  padding: 1.5rem 2rem 1rem 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0; /* Prevent header shrinking */
+  z-index: 10;
+}
+
+.quiz-header h2 {
+  margin: 0;
+  font-weight: 700;
+  color: #1c1d1f;
+  font-size: 1.5rem;
+}
+
+/* --- Scrollable Content Area --- */
+.quiz-content {
+  flex-grow: 1; /* Take remaining height */
+  overflow-y: auto; /* MAKE THIS SCROLLABLE */
+  padding: 1.5rem 2rem 2rem 2rem;
+}
+
+/* Loading message style */
+.quiz-loading {
+    text-align: center;
+    padding: 3rem;
+    font-style: italic;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Quiz Question Styling */
+.quiz-question {
+  margin-bottom: 2rem; /* More space between questions */
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff; /* White background for question block */
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.quiz-question:last-of-type { /* Use last-of-type for better targeting */
   border-bottom: none;
   margin-bottom: 0;
-  padding-bottom: 0;
+  padding-bottom: 1.5rem; /* Keep padding consistent */
 }
 
 .quiz-question h4 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem; /* More space below question text */
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
 }
 
 .quiz-options {
-  display: flex; /* Use flexbox for spacing */
-  flex-direction: column; /* Stack options vertically */
-  gap: 0.75rem; /* Space between options */
+  display: flex;
+  flex-direction: column; /* Stack vertically */
+  gap: 0.8rem; /* Space between options */
 }
 
-/* --- THIS IS THE KEY FIX --- */
 .quiz-options label {
-  display: block; /* Make each label take its own line */
+  display: block; /* Make label take full width */
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.8rem 1rem; /* More padding */
+  border: 1px solid #ddd; /* Add border */
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, border-color 0.2s;
 }
-/* --- END OF FIX --- */
 
 .quiz-options label:hover {
-  background-color: #f0f0f0; /* Highlight on hover */
+  background-color: #f0f5fa; /* Light blue hover */
+  border-color: #a0c4e8;
 }
 
 .quiz-options input[type="radio"] {
-  margin-right: 0.5rem;
+  margin-right: 0.75rem; /* More space after radio */
+  /* Optional: Vertically align radio button better */
+  vertical-align: middle; 
+  width: 16px; 
+  height: 16px;
 }
 
-/* Style the submit button (you might already have btn-submit) */
+/* Submit Button */
 .btn-submit {
   display: block;
   width: 100%;
@@ -56,13 +111,43 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: white;
-  background-color: #a435f0; /* Purple, like Udemy */
+  background-color: #28a745; /* Green submit */
   border: none;
-  border-radius: 4px;
+  border-radius: 5px; /* Consistent radius */
   cursor: pointer;
-  margin-top: 2rem;
+  margin-top: 2.5rem; /* More space above button */
   transition: background-color 0.2s;
 }
 .btn-submit:hover {
-  background-color: #8710d8;
+  background-color: #218838; /* Darker green */
+}
+
+/* Result Screen Styles */
+.result-content {
+    text-align: center;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.result-content h3 {
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+.result-content p {
+    color: #555;
+    margin-bottom: 1.5rem;
+}
+.back-button { /* Style the back button */
+   padding: 0.7rem 1.5rem;
+   background-color: #6c757d; /* Grey */
+   color: white;
+   border: none;
+   border-radius: 5px;
+   font-weight: 500;
+   cursor: pointer;
+   transition: background-color 0.2s;
+}
+.back-button:hover {
+    background-color: #5a6268;
 }

@@ -1,57 +1,48 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react'; // Removed unused useContext
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext'; // Keep context for potential future use
+// Removed AuthContext import
 import API from '../../api'; // Keep API import
-import '../../styles/MyCertificates.css'; // <-- Import the new CSS file
-import '../../styles/learnerDashboard.css'; // <-- Import sidebar styles too
-
+import '../../styles/MyCertificates.css'; // Import your specific styles
+import '../../styles/learnerDashboard.css'; // Import sidebar styles
 
 const MyCertificates = () => {
-    // const { user } = useContext(AuthContext); // Keep user if needed later
+    // Keep state variables
     const [certificates, setCertificates] = useState([]);
-    const [loading, setLoading] = useState(true); // Start loading
+    const [loading, setLoading] = useState(true);
 
+    // Keep useEffect for fetching data
     useEffect(() => {
-        // TODO: Replace mock data with actual API call when backend is ready
         const fetchCertificates = async () => {
-             setLoading(true);
+            setLoading(true);
+            console.log("[FRONTEND] Fetching certificates...");
             try {
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                // MOCK DATA (Replace with actual API call)
-                // Assuming your API returns an array like this
-                 const mockData = [
-                     { id: 1, pathId: 1, pathTitle: 'Full Stack Development', issueDate: '2025-10-19' },
-                     { id: 2, pathId: 2, pathTitle: 'Python complete Bootcamp', issueDate: '2025-10-18' },
-                     // Add more mock certificates if you like
-                 ];
-                // Use this line to test the empty state:
-                // const mockData = []; 
-                setCertificates(mockData);
-
+                const res = await API.get('/learner/my-certificates');
+                console.log("[FRONTEND] Received certificates:", res.data);
+                setCertificates(res.data);
             } catch (error) {
-                console.error("Error fetching certificates:", error);
-                // Handle error state if needed
+                console.error("[FRONTEND] Error fetching certificates:", error.response || error);
             } finally {
                 setLoading(false);
+                console.log("[FRONTEND] Finished fetching certificates.");
             }
         };
         fetchCertificates();
-    }, []);
+    }, []); // Empty dependency array
+
+    // Keep the log for checking state during render
+    console.log("[MyCertificates] Rendering component. Loading:", loading, "Certificates count:", certificates.length, "Data:", certificates);
 
     return (
-        // Use the same layout as LearnerDashboard for consistency
+        // Keep the layout structure
         <div className="dashboard-layout">
-            
-             {/* --- Sidebar (Include if you want it on this page too) --- */}
+
+             {/* --- Sidebar --- */}
              <div className="sidebar">
                 <div className="sidebar-header">My Learning</div>
                 <nav className="sidebar-nav">
                   <Link to="/Dashboard/LearnerDashboard" className="sidebar-link"> Dashboard </Link>
-                  <Link to="/my-certificates" className="sidebar-link active"> My Certificates </Link> 
+                  <Link to="/my-certificates" className="sidebar-link active"> My Certificates </Link>
                 </nav>
-                {/* Add Logout button if needed */}
                 <div className="sidebar-footer">
                   {/* <button onClick={handleLogout} className="logout-button"> Logout </button> */}
                  </div>
@@ -59,36 +50,36 @@ const MyCertificates = () => {
             {/* --- End Sidebar --- */}
 
             {/* --- Main Content Area --- */}
-            <div className="dashboard-main-content certificates-page"> {/* Added specific class */}
+            <div className="dashboard-main-content certificates-page">
                 <h1>My Certificates</h1>
 
                 {loading ? (
                     <div className="loading-certificates">Loading your certificates...</div>
                 ) : certificates.length === 0 ? (
-                    // --- Nicer Empty State ---
+                    // Empty State Message
                     <div className="no-certificates-message">
-                         {/* Optional: Add an icon or image here */}
-                         {/*  */}
                          <p><strong>No Certificates Earned Yet!</strong></p>
                          <p>Complete learning paths to earn certificates and showcase your achievements.</p>
                          <Link to="/Dashboard/LearnerDashboard" className="browse-paths-button">
                              Explore Learning Paths
                          </Link>
                     </div>
-                    // --- End Empty State ---
                 ) : (
-                    // --- Certificate List ---
+                    // Certificate List
                     <ul className="certificate-list">
                         {certificates.map(cert => (
                             <li key={cert.id} className="certificate-item">
-                                <div className="certificate-icon">📜</div> {/* Simple icon */}
+                                <div className="certificate-icon">📜</div>
                                 <div className="certificate-details">
-                                    <strong>{cert.pathTitle}</strong>
-                                    <small>Issued on: {new Date(cert.issueDate).toLocaleDateString()}</small>
+                                    {/* --- FIX 1: Use cert.path_title --- */}
+                                    <strong>{cert.path_title || 'Unknown Path Title'}</strong>
+
+                                    {/* --- FIX 2: Format cert.issue_date safely --- */}
+                                    <small>Issued on: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString() : 'N/A'}</small>
                                 </div>
-                                {/* Link to download */}
+                                {/* Download Link */}
                                 <a
-                                    href={`${API.defaults.baseURL}/learner/certificate/${cert.pathId}?token=${localStorage.getItem('token')}`}
+                                    href={`${API.defaults.baseURL}/learner/certificate/${cert.path_id}?token=${localStorage.getItem('token')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="download-certificate-link"
@@ -98,8 +89,9 @@ const MyCertificates = () => {
                             </li>
                         ))}
                     </ul>
-                    // --- End Certificate List ---
                 )}
+                 {/* Optional: Add Back to Dashboard link if needed outside the empty state */}
+                 { !loading && <Link style={{marginTop: '1rem', display: 'inline-block'}} to="/Dashboard/LearnerDashboard">← Back to Dashboard</Link> }
             </div>
         </div>
     );

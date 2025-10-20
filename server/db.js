@@ -95,6 +95,15 @@ CREATE TABLE IF NOT EXISTS Options (
   is_correct BOOLEAN NOT NULL DEFAULT false,
   FOREIGN KEY (question_id) REFERENCES Questions(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS Certificates (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    path_id INT NOT NULL REFERENCES LearningPaths(id) ON DELETE CASCADE,
+    issue_date TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, path_id) -- Prevent duplicate certificates for same user/path
+  );
 `;
 
 // Function to create tables
