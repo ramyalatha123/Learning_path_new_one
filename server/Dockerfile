@@ -1,18 +1,28 @@
-# Use Node.js 18 as the base image
-FROM node:18
+# --- Backend Dockerfile (server/Dockerfile) ---
 
-# Set working directory inside container
-WORKDIR /app
+# 1. Base Image
+FROM node:18-alpine AS base
 
-# Copy package.json and install dependencies
-COPY package*.json ./
-RUN npm install
+# 2. Set working directory FIRST
+WORKDIR /app 
 
-# Copy all remaining server code
-COPY . .
+# 3. Copy package files to the WORKDIR
+COPY server/package*.json ./
 
-# Expose your backend port
+# 4. Install production dependencies
+RUN npm ci --only=production
+
+# 5. Copy the rest of your server code into a 'server' subdirectory (or directly into /app if preferred)
+# Option A: Copy into /app/server (matches original WORKDIR logic)
+# WORKDIR /app/server # Set this if your code expects it
+# COPY server/. . 
+
+# Option B (Simpler): Copy directly into /app
+WORKDIR /app # Stay in /app
+COPY server/. . # Copy server contents directly into /app
+
+# 6. Expose the port
 EXPOSE 5000
 
-# Start the Node.js server
-CMD ["npm", "start"]
+# 7. Define the start command (relative to WORKDIR /app)
+CMD ["node", "index.js"]
