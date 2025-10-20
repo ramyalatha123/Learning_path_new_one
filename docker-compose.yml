@@ -1,38 +1,56 @@
+# docker-compose.yml (in the main project root)
+
+version: '3.8' # Specify docker-compose version
+
 services:
-  # PostgreSQL database
+  # --- PostgreSQL Database Service ---
   db:
-    image: postgres:15
-    restart: always
+    image: postgres:14-alpine # Use a specific Postgres version
+    container_name: learning-path-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ramya
-      POSTGRES_DB: learningpath_db
+      POSTGRES_DB: learningpath_db # Database name from your db.js
+      POSTGRES_USER: postgres # Default user
+      POSTGRES_PASSWORD: ramya # <-- Your Password
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data # Persist database data
     ports:
-      - "5433:5432"
+      # Map your host port 5433 to container port 5432 (Postgres default)
+      # Use 5433 on the left because your local Postgres uses it
+      - "5434:5432" # Changed host port to 5434 to avoid conflict with local 5433
+    restart: unless-stopped
 
-  # Backend API
+  # --- Backend Service ---
   server:
-    build: ./server
+    container_name: learning-path-server
+    build:
+      context: ./server # Path to the server Dockerfile directory
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5000:5000" # Map host port 5000 to container port 5000
     environment:
-      DB_USER: postgres
-      DB_HOST: db
-      DB_NAME: learningpath_db
-      DB_PASSWORD: ramya
-      DB_PORT: 5432
+      PORT: 5000
+      # Use Docker's internal network to connect to 'db' service on its internal port 5432
+      DATABASE_URL: postgresql://postgres:ramya@db:5432/learningpath_db # <-- Your Password
+      JWT_SECRET: thisisareallylongandrandomsecretkey12345 # <-- Your JWT Secret
+      # Add any other backend environment variables here if needed
     depends_on:
-      - db
+      - db # Wait for the db service to start
+    restart: unless-stopped
 
-  # Frontend (React)
+  # --- Frontend Service ---
   client:
-    build: ./client
+    container_name: learning-path-client
+    build:
+      context: ./client # Path to the client Dockerfile directory
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
-    depends_on:
+      - "3000:80" # Map host port 3000 to container port 80 (Nginx default)
+    # No environment variables needed here unless specifically required by React build
+    depends_on: # Optional: wait for server to be healthy if frontend needs API at build time (unlikely here)
       - server
+    restart: unless-stopped
 
+# --- Volume Definition ---
 volumes:
-  pgdata:
+  postgres_data:
+    driver: local

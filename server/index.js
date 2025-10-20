@@ -5,7 +5,7 @@ const path = require('path');
 // Initialize the app
 const app = express();
 const PORT = process.env.PORT || 5000;
-const { createTables } = require('./db');
+const { createTables, pool } = require('./db');
 // --- Middleware ---
 // Allow requests from other origins (your frontend)
 app.use(cors()); 

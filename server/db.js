@@ -1,14 +1,14 @@
 // Import pg package
 const { Pool } = require('pg');
 require('dotenv').config(); // Loads environment variables from .env (for local use)
+const connectionString = process.env.DATABASE_URL ||
+                         'postgresql://postgres:ramya@localhost:5433/learningpath_db'; // Your local connection
 
 // Configure the database connection
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'learningpath_db',
-  password: process.env.DB_PASSWORD || 'ramya',
-  port: process.env.DB_PORT || 5433,
+  connectionString: connectionString, // Use the chosen connection string
+  // Add SSL config later if deploying to Heroku/Render requires it
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 
