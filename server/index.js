@@ -28,6 +28,10 @@ app.use("/api/learner", learnerRoutes);
 
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
+
+
+const pathRoutes = require('./routes/paths');
+app.use('/api/paths', pathRoutes);
 // --- Start the Server ---
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

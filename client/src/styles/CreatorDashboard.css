@@ -1,276 +1,156 @@
-/* Sets a base for the page */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
-  background-color: #f7f9fa; /* Light grey background */
-  color: #1c1d1f; /* Dark text */
-  margin: 0;
-  padding: 2rem;
+/* --- Reset and base styles --- */
+* {
+  box-sizing: border-box;
 }
 
-/* The main dashboard container */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f7f9fa;
+  color: #1c1d1f;
+  margin: 0;
+  padding: 0;
+  /* Remove overflow: hidden from body if using wrapper */
+}
+
+/* --- Wrapper for full page scroll --- */
+.creator-dashboard-wrapper {
+  height: 100vh; /* Fill screen height */
+  overflow-y: auto; /* Make THIS scrollable */
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  box-sizing: border-box;
+  background-color: #f7f9fa; /* Ensure background consistency */
+}
+
+/* --- Main dashboard container (for centering/max-width) --- */
 .creator-dashboard {
   max-width: 800px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background-color: #ffffff;
-  border: 1px solid #d1d7dc;
+  width: 90%;
+  margin: 0 auto; /* Center it */
+  background-color: transparent; /* Let sections have background */
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Space between sections */
 }
 
-/* Main Heading */
-.creator-dashboard h2 {
-  font-size: 2rem;
+/* --- Sections --- */
+.dashboard-section {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Headings within sections */
+.dashboard-section h2 {
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 2rem;
-  text-align: center;
+  text-align: left;
+  margin: 0 0 1.5rem 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.75rem;
   color: #1c1d1f;
 }
 
-/* Section Headings */
-.creator-dashboard h3 {
-  font-size: 1.5rem;
+.dashboard-section h3 {
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #d1d7dc;
-  padding-bottom: 0.75rem;
+  margin: 1.5rem 0 1rem 0; /* Add top margin */
+  padding-bottom: 0.5rem;
+  color: #333;
 }
 
-/* Form container for inputs */
+/* Form sections */
 .form-section {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2-column layout for inputs */
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: center; /* Align items vertically */
 }
 
-/* Single-column full-width item */
 .form-section-full {
   grid-column: 1 / -1;
 }
 
-/* All text and number inputs */
-.creator-dashboard .form-input {
+.form-input,
+.creator-dashboard select.form-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #1c1d1f;
+  border: 1px solid #aaa;
   border-radius: 4px;
-  box-sizing: border-box; /* Important! */
+  font-size: 1rem;
+  background-color: #fff;
+  color: #1c1d1f;
 }
-
-.creator-dashboard .form-input::placeholder {
-  color: #6a6f73;
-}
-
-.creator-dashboard .form-input:focus {
+.form-input::placeholder { color: #888; }
+.form-input:focus,
+.creator-dashboard select.form-input:focus {
   outline: none;
-  border-color: #007bff; /* Blue accent */
+  border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
-
-/* --- Button Styles --- */
-
-/* Base button style */
-.creator-dashboard .btn {
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-  text-align: center;
+/* Ensure file input has consistent height */
+input[type="file"].form-input {
+    padding: 0.6rem 1rem; /* Adjust padding slightly */
 }
 
-/* Primary Button (Blue, for "Add Resource") */
-.creator-dashboard .btn-primary {
-  background-color: #007bff;
-  color: white;
-  width: 100%;
-  grid-column: 1 / -1; /* Span full width in grid */
-  margin-top: 1rem;
-}
 
-.creator-dashboard .btn-primary:hover {
-  background-color: #0056b3;
-}
-
-/* Final Submit Button (Purple, like Udemy) */
-.creator-dashboard .btn-submit {
-  background-color: #a435f0;
-  color: white;
-  display: block;
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.1rem;
-  margin-top: 2.5rem;
-}
-
-.creator-dashboard .btn-submit:hover {
-  background-color: #8710d8;
-}
-
-/* Danger Button (for "Remove") */
-.creator-dashboard .btn-danger {
-  background-color: transparent;
-  color: #dc3545; /* Red */
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-}
-
-.creator-dashboard .btn-danger:hover {
-  color: #a71d2a;
-  background-color: #f8d7da; /* Light red bg on hover */
-}
-
-/* --- Resource List --- */
-.resource-list {
-  list-style-type: decimal;
-  list-style-position: inside;
-  padding-left: 0;
-  margin-top: 1rem;
-}
-
-.resource-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f7f9fa;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  margin-bottom: 0.75rem;
-}
-
-.resource-item-details {
-  font-size: 0.95rem;
-  color: #333;
-  line-height: 1.4;
-}
-
-.resource-item-details strong {
-  color: #1c1d1f;
-  font-weight: 600;
-}
-
-/* Success Message */
-.success-message {
-  color: #28a745; /* Green */
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  padding: 1rem;
-  border-radius: 4px;
-  text-align: center;
-  margin-top: 1.5rem;
-  font-weight: 600;
-}
-/* --- Modal Styles (for Quiz Builder) --- */
-/* This is the black, see-through background */
-.modal-backdrop {
-  position: fixed; /* Stay in place */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* On top of everything */
-}
-
-/* This is the white pop-up box */
-.modal-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 700px; /* Max width of the pop-up */
-  max-height: 90vh; /* 90% of the screen height */
-  overflow-y: auto; /* Allow scrolling if content is tall */
-}
-
-.modal-content h2 {
-  margin-top: 0;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
-}
-
-/* Styles for the question builder */
-.quiz-question-builder {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: #f9f9f9;
-}
-
-.quiz-options-builder {
-  padding-left: 1rem;
-  margin-top: 1rem;
-}
-
-.quiz-option-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 0.75rem;
-}
-
-.quiz-option-input input[type="radio"] {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-}
-
-.quiz-option-input input[type="text"] {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-/* Styles for the buttons at the bottom */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-}
-
-/* --- New Button Styles --- */
-/* You might already have btn-danger, but btn-secondary is new */
-
+/* --- Buttons --- */
 .btn {
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-  text-align: center;
+  font-size: 1rem; font-weight: 600; padding: 0.75rem 1.5rem; border: none;
+  border-radius: 4px; cursor: pointer; text-align: center;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.btn-primary { background-color: #007bff; color: #fff; }
+.btn-primary:hover { background-color: #0056b3; }
+.btn-submit { background-color: #a435f0; color: white; width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1.5rem; }
+.btn-submit:hover { background-color: #8710d8; }
+.btn-danger { background-color: #dc3545; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; }
+.btn-danger:hover { background-color: #c82333; }
+.btn-secondary { background-color: #6c757d; color: white; padding: 0.5rem 1rem; font-size: 0.9rem; }
+.btn-secondary:hover { background-color: #5a6268; }
+
+
+/* --- Resource List (Draggable) --- */
+.resource-list {
+  list-style: none; margin: 0 0 1.5rem 0; padding: 0;
+}
+.resource-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background-color: #f8f9fa; padding: 0.8rem 1rem; border: 1px solid #e0e0e0;
+  border-radius: 4px; margin-bottom: 0.5rem; user-select: none;
+}
+.resource-item-details { flex-grow: 1; font-size: 0.95rem; color: #333; line-height: 1.4; margin-right: 1rem; }
+.resource-item-details strong { color: #1c1d1f; font-weight: 600; }
+.resource-item-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.resource-item-actions .btn { padding: 0.3rem 0.8rem; font-size: 0.85rem; }
+
+/* Success message */
+.success-message {
+  color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb;
+  padding: 1rem; border-radius: 4px; text-align: center; margin-bottom: 1rem; /* Add bottom margin */ font-weight: 600;
 }
 
-.btn-secondary {
-  background-color: #6c757d; /* Grey */
-  color: white;
-}
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
+/* --- Modal styles --- */
+.modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 2rem; border-radius: 8px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-content h2 { margin-top: 0; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid #eee; font-size: 1.5rem; }
+.quiz-question-builder { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; }
+.quiz-options-builder { padding-left: 1rem; margin-top: 1rem; }
+.quiz-option-input { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+.quiz-option-input input[type="radio"] { flex-shrink: 0; width: 18px; height: 18px; }
+.quiz-option-input input[type="text"] { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+.modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; }
 
-.btn-danger {
-  background-color: #dc3545; /* Red */
-  color: white;
-}
-.btn-danger:hover {
-  background-color: #c82333;
-}
+/* --- Manage Paths List Styles --- */
+.manage-paths-list { list-style: none; padding: 0; margin: 0; }
+.manage-path-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0; }
+.manage-path-item:last-child { border-bottom: none; }
+.path-item-title { font-weight: 500; color: #333; flex-grow: 1; margin-right: 1rem; }
+.path-item-actions { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+.path-status { font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 12px; white-space: nowrap; border: 1px solid; line-height: 1.2; }
+.path-status.public { background-color: #e0f2f7; color: #0d47a1; border-color: #b3e5fc; }
+.path-status.private { background-color: #fce4ec; color: #880e4f; border-color: #f8bbd0; }
+.toggle-vis-btn { padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.toggle-vis-btn:hover { background-color: #5a6268; }

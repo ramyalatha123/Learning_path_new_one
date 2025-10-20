@@ -1,0 +1,120 @@
+/* --- Styles for MyCertificates.jsx --- */
+
+/* Use the main content area from learnerDashboard.css for consistency */
+/* We'll just add specific styles */
+
+.certificates-page h1 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.75rem;
+  font-weight: 700;
+  color: #1c1d1f;
+  font-size: 1.5rem;
+}
+
+/* --- Empty State Styles --- */
+.no-certificates-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-top: 2rem;
+}
+
+.no-certificates-message p:first-of-type { /* Target "No Certificates..." */
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.no-certificates-message p:last-of-type { /* Target description */
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.browse-paths-button {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  background-color: #007bff; /* Blue button */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.browse-paths-button:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+
+/* --- Certificate List Styles --- */
+.certificate-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.certificate-item {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+
+.certificate-item:hover {
+   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.certificate-icon {
+  font-size: 1.8rem; /* Adjust icon size */
+  margin-right: 1.5rem;
+  color: #ff9800; /* Orange icon color */
+}
+
+.certificate-details {
+  flex-grow: 1; /* Take available space */
+}
+
+.certificate-details strong {
+  display: block; /* Title on its own line */
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.certificate-details small {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.download-certificate-link {
+  padding: 6px 12px;
+  background-color: #9c27b0; /* Purple */
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap; /* Prevent wrapping */
+  transition: background-color 0.2s;
+}
+
+.download-certificate-link:hover {
+  background-color: #7b1fa2; /* Darker purple */
+}
+
+/* Loading message style */
+.loading-certificates {
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+    color: #666;
+}

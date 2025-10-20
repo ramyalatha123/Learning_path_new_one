@@ -1,56 +1,149 @@
-/* --- Page Setup --- */
-body { 
+/* --- Styles for LearnerDashboard.jsx with Sidebar & Enhanced Header --- */
+
+body {
   font-family: 'Poppins', sans-serif;
   background-color: #f7f9fa;
   margin: 0;
   padding: 0;
-  /* Prevent body scrolling, we scroll inside the dashboard */
-  overflow: hidden; 
+  overflow: hidden; /* Prevent body scrolling */
 }
 
-/* --- Main Dashboard Container --- */
-.learner-dashboard {
-  display: flex; /* Use flexbox */
-  flex-direction: column; /* Stack header and content vertically */
-  height: 100vh; /* Fill screen height */
-  box-sizing: border-box; 
-  overflow: hidden; /* Prevent this container from scrolling */
-  background-color: #f7f9fa; /* Ensure background consistency */
+/* --- Main Layout: Sidebar + Content --- */
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* --- Header Section (Non-Scrollable) --- */
-.dashboard-header {
-  padding: 1.5rem 2rem; 
-  background-color: #fff; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
-  flex-shrink: 0; /* Prevent header from shrinking */
-  z-index: 10; 
+/* --- Sidebar Styles --- */
+.sidebar {
+  width: 240px;
+  background-color: #2c3e50; /* Dark blue-grey */
+  color: #ecf0f1;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  padding-top: 1.5rem;
 }
 
-.dashboard-header h2 {
-  text-align: left; /* Align welcome message left */
+.sidebar-header {
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  border-bottom: 1px solid #34495e;
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding-top: 1rem;
+}
+
+.sidebar-link {
+  display: block;
+  color: #bdc3c7;
+  text-decoration: none;
+  padding: 0.8rem 1.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid transparent;
+  transition: background-color 0.2s, color 0.2s, border-left-color 0.2s;
+}
+
+.sidebar-link:hover {
+  background-color: #34495e;
+  color: #ecf0f1;
+}
+
+.sidebar-link.active {
+  color: #ffffff;
+  font-weight: 500;
+  border-left-color: #3498db; /* Blue indicator */
+  background-color: #212f3d;
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #34495e;
+  margin-top: auto;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: #e74c3c; /* Red */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+/* --- Main Content Area (Scrollable) --- */
+.dashboard-main-content {
+  flex-grow: 1;
+  overflow-y: auto; /* MAKE THIS SCROLLABLE */
+  padding: 0; /* Remove padding here, add to header/sections */
+  background-color: #f7f9fa;
+}
+
+/* --- Enhanced Header Styles --- */
+.dashboard-header-content {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.5rem; /* Space below header */
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #3498db; /* Blue */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-right: 1rem;
+  text-transform: uppercase;
+  flex-shrink: 0; /* Prevent avatar shrinking */
+}
+
+.dashboard-header-content h2 {
+  margin: 0;
   font-weight: 600;
   color: #333;
-  margin: 0; 
-  font-size: 1.5rem; /* Slightly larger welcome */
+  font-size: 1.5rem;
 }
 
-/* --- Scrollable Content Area --- */
-.dashboard-content {
-  flex-grow: 1; /* Take remaining height */
-  overflow-y: auto; /* MAKE THIS SCROLLABLE */
-  padding: 1rem 2rem 2rem 2rem; 
+.header-subtitle {
+  margin: 0.25rem 0 0 0;
+  color: #555;
+  font-size: 0.9rem;
 }
 
-.dashboard-content h3 {
-  margin-top: 1.5rem; /* Space above section titles */
+/* --- Content Sections --- */
+.dashboard-section {
+  padding: 0 2rem 2rem 2rem; /* Padding for sections */
+}
+
+.dashboard-main-content h3 {
+  margin-top: 0;
   margin-bottom: 1rem;
-  font-weight: 700; /* Bolder section titles */
-  color: #1c1d1f; /* Darker title color like Udemy */
+  font-weight: 700;
+  color: #1c1d1f;
   font-size: 1.25rem;
-}
-.dashboard-content h3:first-child {
-  margin-top: 0.5rem; /* Less space above the very first title */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
 }
 
 /* --- Course Cards Container --- */
@@ -58,19 +151,20 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  justify-content: flex-start; /* Align cards to the left */
+  justify-content: flex-start; /* Align left */
 }
 
-/* --- Path Card Styles (Keep your existing styles) --- */
+/* --- Path Card Styles --- */
 .path-card {
   background: #fff;
-  border-radius: 8px; 
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 300px;
   overflow: hidden;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  cursor: pointer; /* Indicate it's clickable */
 }
 
 .path-card:hover {
@@ -78,23 +172,30 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* --- Style the Resume Card differently --- */
+.path-card.resume-card {
+  /* You can add more distinct styles here if desired */
+  /* Example: border-left: 4px solid #3498db; */
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.2); /* Blueish shadow */
+}
+
 .path-header {
-  cursor: pointer;
+  /* Remove cursor: pointer from here if onClick is on the main card */
 }
 
 .path-image {
   width: 100%;
-  height: 170px;         
-  object-fit: cover;      
-  object-position: top;   
-  background-color: #f0f0f0; 
+  height: 170px;
+  object-fit: cover;
+  object-position: center; /* Center image instead of top */
+  background-color: #f0f0f0;
   display: block;
 }
 
 .path-info {
   padding: 1rem;
-  flex-grow: 1; /* Ensure info section grows */
-  display: flex; /* Use flex to make paragraph grow */
+  flex-grow: 1;
+  display: flex;
   flex-direction: column;
 }
 
@@ -102,38 +203,40 @@ body {
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
-  margin: 0 0 0.5rem 0; 
+  margin: 0 0 0.5rem 0;
+  border-bottom: none; /* Remove border from card titles */
+  padding-bottom: 0;
 }
 
 .path-info p {
   font-size: 0.9rem;
   color: #555;
-  margin: 0 0 1rem 0; 
-  flex-grow: 1; /* Make description push progress bar down */
+  margin: 0 0 1rem 0;
+  flex-grow: 1; /* Make description push progress down */
 }
 
 /* --- Progress Bar --- */
-/* Assuming ProgressBar.jsx uses these classes */
-.progress-bar-container { 
+.progress-bar-container {
   width: 100%;
   background-color: #e0e0e0;
   border-radius: 4px;
   height: 8px;
   overflow: hidden;
-  margin-bottom: 0.5rem; /* Space below progress bar */
+  margin-bottom: 0.5rem;
 }
 
 .progress-bar-fill {
   height: 100%;
   background-color: #4caf50; /* Green */
   border-radius: 4px;
+  transition: width 0.3s ease-in-out;
 }
 
 /* --- Buttons --- */
 .register-btn, .certificate-btn {
-  display: block; 
+  display: block;
   padding: 10px 15px;
-  margin: 0 1rem 1rem 1rem; 
+  margin: 0 1rem 1rem 1rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -141,12 +244,12 @@ body {
   font-size: 0.9rem;
   text-align: center;
   transition: background-color 0.2s;
-  text-decoration: none; /* For the <a> tag */
-  box-sizing: border-box; /* Include padding in width */
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .register-btn {
-  background: #ff9800;
+  background: #ff9800; /* Orange */
   color: #fff;
 }
 .register-btn:hover {
@@ -154,14 +257,51 @@ body {
 }
 
 .certificate-btn {
-  background: #9c27b0;
+  background: #9c27b0; /* Purple */
   color: #fff;
 }
 .certificate-btn:hover {
   background: #7b1fa2;
 }
 
-/* Message for no paths */
-.dashboard-content p {
+/* --- Empty State Message --- */
+.empty-state-message {
   color: #555;
+  font-style: italic;
+  width: 100%; /* Take full width */
+  text-align: center;
+  padding: 1rem 0;
+}
+/* --- Add this style to learnerDashboard.css --- */
+
+.path-card-actions {
+  /* Add some padding if needed, similar to register/certificate buttons */
+   padding: 0 1rem 1rem 1rem; 
+}
+
+.continue-learning-btn {
+  display: block; 
+  width: 100%; /* Make it full width like other buttons */
+  padding: 10px 15px;
+  /* margin-bottom: 1rem; */ /* Add margin if needed */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: background-color 0.2s;
+  background-color: #007bff; /* Blue */
+  color: #fff;
+  box-sizing: border-box; 
+}
+
+.continue-learning-btn:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+
+/* Adjust margins for register/certificate buttons if they exist with continue */
+.register-btn, .certificate-btn {
+   margin: 0; /* Remove top/bottom margin if inside path-card-actions */
+   /* Keep left/right margin if needed, or adjust padding on path-card-actions */
 }

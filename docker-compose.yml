@@ -1,0 +1,38 @@
+services:
+  # PostgreSQL database
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ramya
+      POSTGRES_DB: learningpath_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  # Backend API
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      DB_USER: postgres
+      DB_HOST: db
+      DB_NAME: learningpath_db
+      DB_PASSWORD: ramya
+      DB_PORT: 5432
+    depends_on:
+      - db
+
+  # Frontend (React)
+  client:
+    build: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
