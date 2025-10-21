@@ -68,10 +68,10 @@ A web application that allows users to create, manage, and follow learning paths
 
 
 ![Login Page](screenshots/landpage.png)
-![Creator Dashboard](ScreenShots/Creatorpath.png)
-![Learner Dashboard](ScreenShots/Learner.png)
-![Admin Dashboard](ScreenShots/Admin.png)
-![Home page](ScreenShots/home.png)
+![Creator Dashboard](screenshots/Creatorpath.png)
+![Learner Dashboard](screenshots/Learner.png)
+![Admin Dashboard](screenshots/Admin.png)
+![Home page](screenshots/home.png)
 
 ---
 
