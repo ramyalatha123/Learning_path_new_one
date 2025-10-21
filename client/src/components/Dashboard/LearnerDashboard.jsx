@@ -4,7 +4,9 @@ import { AuthContext } from "../../context/AuthContext";
 import ProgressBar from "../learnerview/ProgressBar";
 import "../../styles/learnerDashboard.css"; // Ensure CSS is imported
 import { useNavigate, Link } from "react-router-dom"; // Import Link
-
+const BACKEND_URL_BASE = process.env.REACT_APP_API_URL 
+    ? process.env.REACT_APP_API_URL.replace('/api', '') 
+    : 'http://localhost:5000';
 const LearnerDashboard = () => {
     const { user, logout } = useContext(AuthContext); // Get user and logout
     const [loading, setLoading] = useState(true);
@@ -53,10 +55,10 @@ const LearnerDashboard = () => {
     >
       <div className="path-header">
         <img
-          src={path.image_url ? `http://localhost:5000${path.image_url}` : '/assets/default_course.png'}
-          alt={path.title}
-          className="path-image"
-        />
+  src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
+  alt={path.title}
+  className="path-image"
+/>
         <div className="path-info">
           <h3>{path.title}</h3>
           <p>{path.short_description}</p>
@@ -78,7 +80,7 @@ const LearnerDashboard = () => {
             className="continue-learning-btn" // Use a distinct class for styling
             onClick={(e) => {
               e.stopPropagation(); // Stop card navigation
-              navigate(`/path/${path.id}`); // Navigate when button clicked
+              navigate(`/path/view/${path.id}`); // Navigate when button clicked
             }}
           >
             Continue Learning
