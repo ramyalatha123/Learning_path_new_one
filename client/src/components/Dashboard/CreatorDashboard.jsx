@@ -6,10 +6,124 @@ import { useNavigate } from "react-router-dom"; // Ensure navigate is imported
 
 // --- QuizBuilderModal (Keep your working code) ---
 function QuizBuilderModal({ resource, onSave, onCancel }) {
+    // Initialize questions state with existing data or an empty array
     const [questions, setQuestions] = useState(resource.questions || []);
-    const handleSave = () => { onSave(questions); };
-    // Simplified return for brevity, keep your full modal code
-    return ( <div className="modal-backdrop"><div className="modal-content"><h2>Quiz Builder: {resource.title}</h2><p>(Quiz build form here)</p><div className="modal-actions"><button type="button" onClick={handleSave} className="btn btn-primary">Save</button><button type="button" onClick={onCancel} className="btn btn-danger">Cancel</button></div></div></div> );
+
+    // State for a new, temporary question being added
+    const [newQuestionText, setNewQuestionText] = useState('');
+    const [newOptions, setNewOptions] = useState(['', '', '']); // Start with 3 option fields
+    const [correctOptionIndex, setCorrectOptionIndex] = useState(-1); // Index of the correct answer
+
+    // --- Handlers ---
+    
+    // 1. Adds the current question/options to the main 'questions' array
+    const handleAddQuestion = () => {
+        if (!newQuestionText.trim() || correctOptionIndex === -1) {
+            alert("Please enter a question and select the correct answer.");
+            return;
+        }
+
+        const questionToAdd = {
+            text: newQuestionText.trim(),
+            options: newOptions.filter(o => o.trim()).map((text, index) => ({
+                text: text.trim(),
+                isCorrect: index === correctOptionIndex
+            }))
+        };
+        
+        setQuestions([...questions, questionToAdd]);
+
+        // Reset the form fields
+        setNewQuestionText('');
+        setNewOptions(['', '', '']);
+        setCorrectOptionIndex(-1);
+    };
+
+    // 2. Saves the collected questions and closes the modal
+    const handleSave = () => { 
+        if (questions.length === 0) {
+             alert("Please add at least one question before saving.");
+             return;
+        }
+        onSave(questions); 
+    };
+
+    // 3. Handles option input changes
+    const handleOptionChange = (index, value) => {
+        const updatedOptions = [...newOptions];
+        updatedOptions[index] = value;
+        setNewOptions(updatedOptions);
+    };
+    return ( 
+        <div className="modal-backdrop">
+            <div className="modal-content">
+                <h2>Quiz Builder: {resource.title}</h2>
+                
+                {/* Display Current Questions */}
+                <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
+                    {questions.length === 0 ? (
+                        <p>No questions added yet.</p>
+                    ) : (
+                        questions.map((q, qIndex) => (
+                            <div key={qIndex} className="quiz-question-display">
+                                <strong>Q{qIndex + 1}: {q.text}</strong>
+                                <ul>
+                                    {q.options.map((o, oIndex) => (
+                                        <li key={oIndex} style={{ color: o.isCorrect ? 'green' : 'inherit' }}>
+                                            {o.text} {o.isCorrect && ' (Correct)'}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Add New Question Form */}
+                <div className="quiz-add-form">
+                    <h4>Add New Question</h4>
+                    <input 
+                        type="text" 
+                        placeholder="Enter Question Text" 
+                        value={newQuestionText} 
+                        onChange={(e) => setNewQuestionText(e.target.value)}
+                        className="form-input form-section-full"
+                        style={{ marginBottom: '1rem' }}
+                    />
+                    
+                    {/* Options Input */}
+                    {newOptions.map((option, index) => (
+                        <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'center' }}>
+                            <input 
+                                type="radio" 
+                                name="correctOption" 
+                                checked={correctOptionIndex === index}
+                                onChange={() => setCorrectOptionIndex(index)} 
+                                style={{ flexShrink: 0 }}
+                            />
+                            <input 
+                                type="text" 
+                                placeholder={`Option ${index + 1}`}
+                                value={option}
+                                onChange={(e) => handleOptionChange(index, e.target.value)}
+                                className="form-input"
+                            />
+                        </div>
+                    ))}
+                    
+                    <button type="button" onClick={handleAddQuestion} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
+                        Add Question to Quiz
+                    </button>
+                </div>
+                
+                {/* Modal Actions */}
+                <div className="modal-actions">
+                    <button type="button" onClick={handleSave} className="btn btn-submit">Save Quiz</button>
+                    <button type="button" onClick={onCancel} className="btn btn-danger">Cancel</button>
+                </div>
+            </div>
+        </div> 
+    );
 }
 
 // --- UPDATED CREATOR DASHBOARD ---
