@@ -66,14 +66,12 @@ A web application that allows users to create, manage, and follow learning paths
 
 ## Screenshots
 
-> Add your screenshots here. Example:
 
-![Login Page](./assets/screenshots/landpage.png)
-![Creator Dashboard](./assets/ScreenShots/Creatorpath.png)
-![Learner Dashboard](./assets/ScreenShots/Learnerpath.png)
-![Admin Dashboard](./assets/ScreenShots/Arjun.png)
-![Progress](./assets/ScreenShots/Progress)
-
+![Login Page](screenshots/landpage.png)
+![Creator Dashboard](ScreenShots/Creatorpath.png)
+![Learner Dashboard](ScreenShots/Learner.png)
+![Admin Dashboard](ScreenShots/Admin.png)
+![Home page](ScreenShots/home.png)
 
 ---
 
