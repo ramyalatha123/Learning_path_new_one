@@ -11,6 +11,9 @@ const { createTables, pool } = require('./db');
 app.use(cors()); 
 // Allow the server to read JSON from request bodies
 app.use(express.json()); 
+app.get('/', (req, res) => {
+  res.send('Server is running and healthy!');
+});
 app.use(express.static(path.join(__dirname, 'public')));
 createTables(); // <-- 1. ADD THIS LINE HERE
 
