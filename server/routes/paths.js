@@ -8,17 +8,37 @@ router.get('/mypaths', authMiddleware, async (req, res) => {
     if (req.user.role !== 'creator') {
         return res.status(403).json({ message: 'Access denied. Creator role required.' });
     }
-     
+      
     try {
         const creator_id = req.user.id;
+        
+        // 🛑 CRITICAL FIX: Use JOIN, COUNT, and SUM to retrieve all data required by the dashboard cards
         const myPaths = await pool.query(
-            'SELECT id, title, is_public FROM LearningPaths WHERE creator_id = $1 ORDER BY id ASC',
+            `SELECT 
+                lp.id, 
+                lp.title, 
+                lp.image_url, 
+                lp.is_public,
+                -- 1. Calculate Resource Count
+                COUNT(r.id) AS resource_count, 
+                -- 2. Calculate Total Time (Use COALESCE to ensure 0 is returned if no resources exist)
+                COALESCE(SUM(r.estimated_time), 0) AS total_time 
+            FROM LearningPaths lp
+            LEFT JOIN Resources r ON lp.id = r.path_id
+            WHERE lp.creator_id = $1
+            GROUP BY lp.id, lp.title, lp.image_url, lp.is_public -- Group by all non-aggregated columns
+            ORDER BY lp.id DESC`,
             [creator_id]
         );
+        
+        // Final sanity check for console logging
+        console.log(`[LOG /mypaths] Found ${myPaths.rows.length} paths with stats.`);
+
         res.json(myPaths.rows);
+
     } catch (err) {
-        console.error("Error fetching creator paths:", err.message);
-        res.status(500).json({ message: "Server Error" });
+        console.error("Error fetching creator paths:", err.message, err.stack);
+        res.status(500).json({ message: "Server Error fetching creator paths." });
     }
 });
 

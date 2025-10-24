@@ -1,16 +1,17 @@
 import React from "react";
-// Import Routes and Route, but NOT BrowserRouter
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./components/Home";
 import Login from "./components/Auth/Login";
 import Signup from "./components/Auth/Signup";
 import CreatorDashboard from "./components/Dashboard/CreatorDashboard";
+import CreatePathPage from "./components/Dashboard/CreatePathPage"; // NEW IMPORT
+import EditPathPage from "./components/Dashboard/EditPathPage"; // NEW IMPORT
 import LearnerDashboard from "./components/Dashboard/LearnerDashboard";
 import ProtectedRoute from "./components/Shared/ProtectedRoute";
 import PathViewer from "./components/learnerview/PathViewer";
-import Quiz from "./components/learnerview/Quiz"; 
-import AdminDashboard from "./components/Dashboard/AdminDashboard"; // <-- 1. IMPORT ADMIN DASHBOARD
+import Quiz from "./components/learnerview/Quiz";
+import AdminDashboard from "./components/Dashboard/AdminDashboard";
 import MyCertificates from "./components/Dashboard/MyCertificates";
 import PathDetails from "./components/learnerview/PathDetails";
 
@@ -21,7 +22,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* --- 2. ADD THIS NEW ADMIN ROUTE --- */}
+      {/* Admin Route */}
       <Route
         path="/admin"
         element={
@@ -30,16 +31,38 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* --- END OF NEW ROUTE --- */}
 
+      {/* Creator Dashboard Routes - UPDATED */}
       <Route
-        path="/Dashboard/CreatorDashboard/*"
+        path="/dashboard/CreatorDashboard"
         element={
           <ProtectedRoute roles={["creator"]}>
             <CreatorDashboard />
           </ProtectedRoute>
         }
       />
+      
+      {/* NEW: Create Path Route */}
+      <Route
+        path="/dashboard/creator/create-path"
+        element={
+          <ProtectedRoute roles={["creator"]}>
+            <CreatePathPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* NEW: Edit Path Route */}
+      <Route
+        path="/dashboard/creator/edit-path/:pathId"
+        element={
+          <ProtectedRoute roles={["creator"]}>
+            <EditPathPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Learner Dashboard Route */}
       <Route
         path="/Dashboard/LearnerDashboard/*"
         element={
@@ -49,6 +72,7 @@ function App() {
         }
       />
 
+      {/* Path Viewer Route */}
       <Route
         path="/path/view/:pathId"
         element={
@@ -58,6 +82,7 @@ function App() {
         }
       />
 
+      {/* Quiz Route */}
       <Route
         path="/quiz/:resourceId"
         element={
@@ -66,26 +91,26 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Path Details Route */}
       <Route
-    path="/path/details/:pathId"
-    element={
-        <ProtectedRoute roles={["learner", "creator"]}>
-            <PathDetails /> 
-        </ProtectedRoute>
-    }
-/>
+        path="/path/details/:pathId"
+        element={
+          <ProtectedRoute roles={["learner", "creator"]}>
+            <PathDetails />
+          </ProtectedRoute>
+        }
+      />
 
-
-      {/* --- ADD THIS NEW CERTIFICATES ROUTE --- */}
+      {/* My Certificates Route */}
       <Route
         path="/my-certificates"
         element={
-          <ProtectedRoute roles={["learner"]}> {/* Or maybe all roles? */}
+          <ProtectedRoute roles={["learner"]}>
             <MyCertificates />
           </ProtectedRoute>
         }
       />
-      {/* --- END OF NEW ROUTE --- */}
     </Routes>
   );
 }
