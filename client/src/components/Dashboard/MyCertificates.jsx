@@ -8,6 +8,28 @@ const MyCertificates = () => {
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const downloadCertificate = async (pathId) => {
+        try {
+            const response = await API.get(`/learner/certificate/${pathId}`, {
+                responseType: 'blob'
+            });
+            
+            // Create a blob URL and trigger download
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `certificate_${pathId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading certificate:', error);
+            alert('Failed to download certificate. Please try again.');
+        }
+    };
+
     useEffect(() => {
         const fetchCertificates = async () => {
             setLoading(true);
@@ -107,15 +129,13 @@ const MyCertificates = () => {
                                     </div>
 
                                     <div className="certificate-card-footer">
-                                        <a
-                                            href={`${API.defaults.baseURL}/learner/certificate/${cert.path_id}?token=${localStorage.getItem('token')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => downloadCertificate(cert.path_id)}
                                             className="download-button"
                                         >
                                             <span className="button-icon">⬇</span>
                                             Download PDF
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             ))}
