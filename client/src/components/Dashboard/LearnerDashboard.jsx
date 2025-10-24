@@ -90,16 +90,17 @@ const LearnerDashboard = () => {
 
         {/* Show "Register" button if NOT registered */}
         {!path.registered && (
-          <button
-            className="register-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              registerPath(path.id);
-            }}
-          >
-            Register for this Path
-          </button>
-        )}
+    <button
+      className="register-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        // CHANGE: Navigate to the details page instead of registering immediately
+        navigate(`/path/details/${path.id}`); 
+      }}
+    >
+      View Details & Register
+    </button>
+)}
 
         {/* Show "Certificate" button if COMPLETED */}
         {path.completed && (

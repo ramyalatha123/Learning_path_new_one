@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react'; // Removed unused useContext
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// Removed AuthContext import
-import API from '../../api'; // Keep API import
-import '../../styles/MyCertificates.css'; // Import your specific styles
-import '../../styles/learnerDashboard.css'; // Import sidebar styles
+import API from '../../api';
+import '../../styles/MyCertificates.css';
+import '../../styles/learnerDashboard.css';
 
 const MyCertificates = () => {
-    // Keep state variables
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Keep useEffect for fetching data
     useEffect(() => {
         const fetchCertificates = async () => {
             setLoading(true);
@@ -23,75 +20,108 @@ const MyCertificates = () => {
                 console.error("[FRONTEND] Error fetching certificates:", error.response || error);
             } finally {
                 setLoading(false);
-                console.log("[FRONTEND] Finished fetching certificates.");
             }
         };
         fetchCertificates();
-    }, []); // Empty dependency array
-
-    // Keep the log for checking state during render
-    console.log("[MyCertificates] Rendering component. Loading:", loading, "Certificates count:", certificates.length, "Data:", certificates);
+    }, []);
 
     return (
-        // Keep the layout structure
         <div className="dashboard-layout">
-
-             {/* --- Sidebar --- */}
-             <div className="sidebar">
+            {/* Sidebar */}
+            <div className="sidebar">
                 <div className="sidebar-header">My Learning</div>
                 <nav className="sidebar-nav">
-                  <Link to="/Dashboard/LearnerDashboard" className="sidebar-link"> Dashboard </Link>
-                  <Link to="/my-certificates" className="sidebar-link active"> My Certificates </Link>
+                    <Link to="/Dashboard/LearnerDashboard" className="sidebar-link">Dashboard</Link>
+                    <Link to="/my-certificates" className="sidebar-link active">My Certificates</Link>
                 </nav>
-                <div className="sidebar-footer">
-                  {/* <button onClick={handleLogout} className="logout-button"> Logout </button> */}
-                 </div>
             </div>
-            {/* --- End Sidebar --- */}
 
-            {/* --- Main Content Area --- */}
+            {/* Main Content */}
             <div className="dashboard-main-content certificates-page">
-                <h1>My Certificates</h1>
+                <div className="certificates-header">
+                    <div>
+                        <h1>🏆 My Certificates</h1>
+                        <p className="certificates-subtitle">
+                            Your achievements and completed learning paths
+                        </p>
+                    </div>
+                    <Link to="/Dashboard/LearnerDashboard" className="back-link-button">
+                        ← Back to Dashboard
+                    </Link>
+                </div>
 
                 {loading ? (
-                    <div className="loading-certificates">Loading your certificates...</div>
+                    <div className="loading-state">
+                        <div className="spinner"></div>
+                        <p>Loading your certificates...</p>
+                    </div>
                 ) : certificates.length === 0 ? (
-                    // Empty State Message
-                    <div className="no-certificates-message">
-                         <p><strong>No Certificates Earned Yet!</strong></p>
-                         <p>Complete learning paths to earn certificates and showcase your achievements.</p>
-                         <Link to="/Dashboard/LearnerDashboard" className="browse-paths-button">
-                             Explore Learning Paths
-                         </Link>
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📜</div>
+                        <h2>No Certificates Yet</h2>
+                        <p>Complete learning paths to earn certificates and showcase your achievements!</p>
+                        <Link to="/Dashboard/LearnerDashboard" className="cta-button">
+                            Explore Learning Paths →
+                        </Link>
                     </div>
                 ) : (
-                    // Certificate List
-                    <ul className="certificate-list">
-                        {certificates.map(cert => (
-                            <li key={cert.id} className="certificate-item">
-                                <div className="certificate-icon">📜</div>
-                                <div className="certificate-details">
-                                    {/* --- FIX 1: Use cert.path_title --- */}
-                                    <strong>{cert.path_title || 'Unknown Path Title'}</strong>
+                    <>
+                        <div className="certificates-stats">
+                            <div className="stat-card">
+                                <span className="stat-number">{certificates.length}</span>
+                                <span className="stat-label">Certificates Earned</span>
+                            </div>
+                        </div>
 
-                                    {/* --- FIX 2: Format cert.issue_date safely --- */}
-                                    <small>Issued on: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString() : 'N/A'}</small>
+                        <div className="certificates-grid">
+                            {certificates.map(cert => (
+                                <div key={cert.id} className="certificate-card">
+                                    <div className="certificate-card-header">
+                                        <div className="certificate-badge">
+                                            <span className="badge-icon">🎓</span>
+                                        </div>
+                                        <div className="certificate-ribbon">Certified</div>
+                                    </div>
+                                    
+                                    <div className="certificate-card-body">
+                                        <h3 className="certificate-title">
+                                            {cert.path_title || 'Unknown Path Title'}
+                                        </h3>
+                                        
+                                        <div className="certificate-meta">
+                                            <div className="meta-item">
+                                                <span className="meta-icon">📅</span>
+                                                <span className="meta-text">
+                                                    Issued on {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString('en-US', { 
+                                                        year: 'numeric', 
+                                                        month: 'long', 
+                                                        day: 'numeric' 
+                                                    }) : 'N/A'}
+                                                </span>
+                                            </div>
+                                            <div className="meta-item">
+                                                <span className="meta-icon">🆔</span>
+                                                <span className="meta-text">ID: #{cert.id}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="certificate-card-footer">
+                                        <a
+                                            href={`${API.defaults.baseURL}/learner/certificate/${cert.path_id}?token=${localStorage.getItem('token')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="download-button"
+                                        >
+                                            <span className="button-icon">⬇</span>
+                                            Download PDF
+                                        </a>
+                                    </div>
                                 </div>
-                                {/* Download Link */}
-                                <a
-                                    href={`${API.defaults.baseURL}/learner/certificate/${cert.path_id}?token=${localStorage.getItem('token')}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="download-certificate-link"
-                                >
-                                    Download PDF
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
+                            ))}
+                        </div>
+                    </>
                 )}
-                 {/* Optional: Add Back to Dashboard link if needed outside the empty state */}
-                 { !loading && <Link style={{marginTop: '1rem', display: 'inline-block'}} to="/Dashboard/LearnerDashboard">← Back to Dashboard</Link> }
             </div>
         </div>
     );

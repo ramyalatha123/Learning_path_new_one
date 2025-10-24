@@ -160,10 +160,57 @@ const CreateDashboard = () => {
     useEffect(() => { fetchMyPaths(); }, []);
 
     // --- Keep Existing Functions ---
-    const handleResourceChange = (e) => setNewResource({ ...newResource, [e.target.name]: e.target.value });
+    const handleResourceChange = (e) => {
+    let value = e.target.value;
+    const name = e.target.name;
+
+    // CRITICAL FIX: Treat estimatedTime as a number and ensure empty string defaults to 0.
+    if (name === 'estimatedTime') {
+        // Parse the value. If it fails (NaN), default to 0. If it's an empty string, keep it as an empty string for the input field.
+        const parsedValue = parseInt(value, 10);
+        value = isNaN(parsedValue) ? 0 : parsedValue;
+
+        // If the input field is emptied, let the state be an empty string so the user can type
+        if (e.target.value === "") {
+            value = "";
+        }
+    }
+
+    setNewResource({ 
+        ...newResource, 
+        [name]: value 
+    });
+};
     const addResource = () => {
-         if (!newResource.title) { alert("Title required!"); return; } if (newResource.type !== 'quiz' && !newResource.url) { alert("URL required!"); return; } const resourceToAdd = { ...newResource, tempId: `temp-${Date.now()}-${resources.length}`, order: resources.length, questions: newResource.type === 'quiz' ? [] : undefined }; setResources([...resources, resourceToAdd]); setNewResource({ title: "", type: "video", url: "", description: "", estimatedTime: "" });
-    };
+    if (!newResource.title) { alert("Title required!"); return; } 
+    if (newResource.type !== 'quiz' && !newResource.url) { alert("URL required!"); return; } 
+    
+    // 🛑 CRITICAL FIX: Ensure estimatedTime is sent as a clean number 🛑
+    const finalEstimatedTime = newResource.estimatedTime === "" 
+                               ? 0 
+                               : parseInt(newResource.estimatedTime, 10) || 0;
+    
+    // Safety check:
+    if (isNaN(finalEstimatedTime)) {
+        alert("Estimated time is invalid.");
+        return;
+    }
+
+    const resourceToAdd = { 
+        ...newResource, 
+        // Use the cleaned number here
+        estimatedTime: finalEstimatedTime, 
+        
+        tempId: `temp-${Date.now()}-${resources.length}`, 
+        order: resources.length, 
+        questions: newResource.type === 'quiz' ? [] : undefined 
+    }; 
+    
+    setResources([...resources, resourceToAdd]); 
+    
+    // Reset form field for next resource entry
+    setNewResource({ title: "", type: "video", url: "", description: "", estimatedTime: "" }); 
+};
     const removeResource = (indexToRemove) => {
          const newResources = resources.filter((_, index) => index !== indexToRemove); const reorderedResources = newResources.map((res, index) => ({ ...res, order: index })); setResources(reorderedResources);
     };
@@ -174,10 +221,56 @@ const CreateDashboard = () => {
     const handleToggleVisibility = async (pathId, currentVisibility) => {
          const newVisibility = !currentVisibility; try { setPathMessage(''); setPathError(''); await API.put(`/creator/paths/${pathId}/visibility`, { is_public: newVisibility }); setMyPaths(prevPaths => prevPaths.map(p => p.id === pathId ? { ...p, is_public: newVisibility } : p)); setPathMessage(`Path set to ${newVisibility ? 'Public' : 'Private'}`); } catch (err) { console.error("Vis Error:", err); setPathError(err.response?.data?.message || 'Failed update'); }
     };
-    const submitPath = async () => {
-        if (!pathTitle || !image || resources.length === 0) { alert("Title, image, & resource required!"); return; }
-        try { const formData = new FormData(); formData.append("title", pathTitle); const resToSend = resources.map(({ tempId, ...rest }) => rest); formData.append("resources", JSON.stringify(resToSend)); formData.append("image", image); await API.post("/creator/learning-paths", formData, { headers: { "Content-Type": "multipart/form-data" } }); setMessage("Path created!"); setPathTitle(""); setResources([]); setImage(null); fetchMyPaths(); } catch (err) { alert(err.response?.data?.message || "Error creating path"); }
-    };
+    // In client/src/Dashboard/CreatorDashboard.jsx
+
+const submitPath = async () => {
+    if (!pathTitle || !image || resources.length === 0) { 
+        alert("Title, image, & resource required!"); 
+        return; 
+    }
+
+    try { 
+        const formData = new FormData(); 
+        formData.append("title", pathTitle); 
+
+        // 🛑 CRITICAL FIX: Use snake_case 'estimated_time' to match database schema 🛑
+        const resToSend = resources.map(({ tempId, estimatedTime, ...rest }) => {
+            
+            // 1. Force the value to an integer, defaulting to 0 if NaN/null/empty string
+            let cleanedTime = parseInt(estimatedTime, 10);
+            
+            if (isNaN(cleanedTime)) {
+                cleanedTime = 0;
+            }
+            
+            // 2. CRITICAL: Use 'estimated_time' (snake_case) to match backend/database
+            return {
+                ...rest,
+                estimated_time: cleanedTime  // ✅ Changed from estimatedTime to estimated_time
+            };
+        });
+
+        console.log("Sending resources:", JSON.stringify(resToSend, null, 2)); // Debug log
+        
+        formData.append("resources", JSON.stringify(resToSend)); 
+        formData.append("image", image); 
+
+        // POST: Submit the path
+        await API.post("/creator/learning-paths", formData, { 
+            headers: { "Content-Type": "multipart/form-data" } 
+        }); 
+        
+        setMessage("Path created!"); 
+        setPathTitle(""); 
+        setResources([]); 
+        setImage(null); 
+        fetchMyPaths(); 
+
+    } catch (err) { 
+        console.error("Error creating path:", err);
+        alert(err.response?.data?.message || "Error creating path"); 
+    }
+};
 
     return (
         // --- Added Wrapper for Scrolling ---

@@ -12,6 +12,7 @@ import PathViewer from "./components/learnerview/PathViewer";
 import Quiz from "./components/learnerview/Quiz"; 
 import AdminDashboard from "./components/Dashboard/AdminDashboard"; // <-- 1. IMPORT ADMIN DASHBOARD
 import MyCertificates from "./components/Dashboard/MyCertificates";
+import PathDetails from "./components/learnerview/PathDetails";
 
 function App() {
   return (
@@ -65,6 +66,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+    path="/path/details/:pathId"
+    element={
+        <ProtectedRoute roles={["learner", "creator"]}>
+            <PathDetails /> 
+        </ProtectedRoute>
+    }
+/>
 
 
       {/* --- ADD THIS NEW CERTIFICATES ROUTE --- */}

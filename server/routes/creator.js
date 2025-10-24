@@ -112,46 +112,67 @@ router.post(
         console.log(`[LOG] Inserted Learning Path with ID: ${pathId}`);
 
         // 2️⃣ Insert each Resource with "order"
-        console.log(`[LOG] Looping through ${parsedResources.length} resources to insert...`);
-        for (let i = 0; i < parsedResources.length; i++) {
-            const r = parsedResources[i];
-             // Validate resource object
-             if (!r || typeof r !== 'object' || !r.title || !r.type) {
-                console.error(`!!! Invalid resource object at index ${i}:`, r);
-                throw new Error(`Invalid resource data at index ${i}.`);
-             }
-            console.log(`[LOG] Inserting resource ${i + 1}: "${r.title}" (Type: ${r.type}, Order: ${r.order ?? i})`);
-            const resourceResult = await client.query(
-                `INSERT INTO Resources (path_id, title, type, url, description, estimated_time, "order")
-                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-                [ pathId, r.title, r.type, r.url || null, r.description || "", r.estimated_time || 0, r.order ?? i ]
-            );
-            const resourceId = resourceResult.rows[0].id;
-            console.log(`[LOG] Inserted resource with ID: ${resourceId}`);
+        // 2️⃣ Insert each Resource with "order"
+console.log(`[LOG] Looping through ${parsedResources.length} resources to insert...`);
+for (let i = 0; i < parsedResources.length; i++) {
+    const r = parsedResources[i];
+    
+    // Validate resource object
+    if (!r || typeof r !== 'object' || !r.title || !r.type) {
+        console.error(`!!! Invalid resource object at index ${i}:`, r);
+        throw new Error(`Invalid resource data at index ${i}.`);
+    }
+    
+    // 🛑 CRITICAL FIX: Now frontend sends 'estimated_time', so read that directly 🛑
+    const finalEstimatedTime = parseInt(r.estimated_time, 10) || 0;
+    
+    console.log(`[LOG] Inserting resource ${i + 1}: "${r.title}" (Type: ${r.type}, EstTime: ${finalEstimatedTime} mins, Order: ${r.order ?? i})`);
+    
+    const resourceResult = await client.query(
+        `INSERT INTO Resources (path_id, title, type, url, description, estimated_time, "order")
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        [ pathId, r.title, r.type, r.url || null, r.description || "", finalEstimatedTime, r.order ?? i ]
+    );
+    const resourceId = resourceResult.rows[0].id;
+    console.log(`[LOG] ✅ Inserted resource with ID: ${resourceId}, Time saved: ${finalEstimatedTime} mins`);
 
-            // 3️⃣ Handle Quiz Resources
-            if (r.type === "quiz" && r.questions && Array.isArray(r.questions) && r.questions.length > 0) {
-                 console.log(`[LOG] Processing ${r.questions.length} questions for quiz resource ID: ${resourceId}`);
-                for (const q of r.questions) {
-                     // Add validation for question and options
-                     if (!q || !q.text || !Array.isArray(q.options)) { throw new Error(`Invalid Q format @ R_ID ${resourceId}`); }
-                    const questionResult = await client.query('INSERT INTO Questions (resource_id, question_text) VALUES ($1, $2) RETURNING id', [resourceId, q.text]);
-                    const questionId = questionResult.rows[0].id;
-                    console.log(`[LOG] Inserted question with ID: ${questionId}`);
-                    let correctOptionExists = false;
-                    for (const o of q.options) {
-                         if (!o || typeof o.text === 'undefined' || typeof o.isCorrect === 'undefined') { throw new Error(`Invalid Option format @ Q_ID ${questionId}`); }
-                         if (o.isCorrect === true) correctOptionExists = true;
-                        await client.query('INSERT INTO Options (question_id, option_text, is_correct) VALUES ($1, $2, $3)', [questionId, o.text, o.isCorrect]);
-                    }
-                     if (!correctOptionExists && q.options.length > 0) { throw new Error(`No correct option for Q_ID ${questionId}.`); }
-                    console.log(`[LOG] Inserted ${q.options.length} options for question ID: ${questionId}`);
-                }
-            } else if (r.type === "quiz") {
-                console.log(`[LOG] Quiz resource ID: ${resourceId} has no questions or invalid format.`);
-                // throw new Error(`Quiz resource ID ${resourceId} must contain valid questions.`); // Uncomment if quizzes MUST have questions
+    // 3️⃣ Handle Quiz Resources
+    if (r.type === "quiz" && r.questions && Array.isArray(r.questions) && r.questions.length > 0) {
+        console.log(`[LOG] Processing ${r.questions.length} questions for quiz resource ID: ${resourceId}`);
+        for (const q of r.questions) {
+            // Add validation for question and options
+            if (!q || !q.text || !Array.isArray(q.options)) { 
+                throw new Error(`Invalid Q format @ R_ID ${resourceId}`); 
             }
+            const questionResult = await client.query(
+                'INSERT INTO Questions (resource_id, question_text) VALUES ($1, $2) RETURNING id', 
+                [resourceId, q.text]
+            );
+            const questionId = questionResult.rows[0].id;
+            console.log(`[LOG] Inserted question with ID: ${questionId}`);
+            
+            let correctOptionExists = false;
+            for (const o of q.options) {
+                if (!o || typeof o.text === 'undefined' || typeof o.isCorrect === 'undefined') { 
+                    throw new Error(`Invalid Option format @ Q_ID ${questionId}`); 
+                }
+                if (o.isCorrect === true) correctOptionExists = true;
+                await client.query(
+                    'INSERT INTO Options (question_id, option_text, is_correct) VALUES ($1, $2, $3)', 
+                    [questionId, o.text, o.isCorrect]
+                );
+            }
+            
+            if (!correctOptionExists && q.options.length > 0) { 
+                throw new Error(`No correct option for Q_ID ${questionId}.`); 
+            }
+            console.log(`[LOG] Inserted ${q.options.length} options for question ID: ${questionId}`);
         }
+    } else if (r.type === "quiz") {
+        console.log(`[LOG] Quiz resource ID: ${resourceId} has no questions or invalid format.`);
+        // throw new Error(`Quiz resource ID ${resourceId} must contain valid questions.`); // Uncomment if quizzes MUST have questions
+    }
+}
 
         console.log("[LOG] Committing transaction...");
         await client.query("COMMIT");
