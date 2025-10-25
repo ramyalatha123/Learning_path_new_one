@@ -6,14 +6,15 @@ import "../../styles/CreatorDashboard.css";
 const CreatorDashboard = () => {
     const navigate = useNavigate();
     const [myPaths, setMyPaths] = useState([]);
-    const [loadingPaths, setLoadingPaths] = useState(true);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    // Fetch creator's paths
+    useEffect(() => {
+        fetchMyPaths();
+    }, []);
+
     const fetchMyPaths = async () => {
         try {
-            setLoadingPaths(true);
-            setError('');
+            setLoading(true);
             const res = await API.get('/paths/mypaths');
             
             // Fix image URLs if they're relative paths
@@ -24,43 +25,21 @@ const CreatorDashboard = () => {
                     : path.image_url
             }));
             
-            console.log("Loaded paths:", pathsWithFullUrls); // Debug log
+            console.log("Loaded paths:", pathsWithFullUrls);
             setMyPaths(pathsWithFullUrls);
-            setLoadingPaths(false);
         } catch (err) {
             console.error("Error fetching paths:", err);
-            setError(err.response?.data?.message || 'Failed to load your paths.');
-            setLoadingPaths(false);
+            alert(err.response?.data?.message || 'Failed to load your paths.');
+        } finally {
+            setLoading(false);
         }
     };
-    useEffect(() => {
-    console.log("=== DEBUG INFO ===");
-    console.log("My Paths Data:", myPaths);
-    console.log("Loading State:", loadingPaths);
-    console.log("Error State:", error);
-    
-    // Check each path's image URL
-    myPaths.forEach((path, index) => {
-        console.log(`Path ${index + 1}: "${path.title}"`);
-        console.log(`  - Image URL: ${path.image_url}`);
-        console.log(`  - Is Public: ${path.is_public}`);
-        console.log(`  - Resource Count: ${path.resource_count}`);
-    });
-    
-    console.log("=== END DEBUG ===");
-}, [myPaths, loadingPaths, error]);
-
-    useEffect(() => {
-        fetchMyPaths();
-    }, []);
 
     const handleCreateNew = () => {
-        console.log("Create New Path clicked");
         navigate('/dashboard/creator/create-path');
     };
 
     const handleEditPath = (pathId) => {
-        console.log("Edit path clicked:", pathId);
         navigate(`/dashboard/creator/edit-path/${pathId}`);
     };
 
@@ -84,34 +63,36 @@ const CreatorDashboard = () => {
     };
 
     return (
-        <div className="creator-dashboard-container">
+        <div className="creator-dashboard">
+            {/* Header */}
             <div className="dashboard-header">
                 <div>
                     <h1>My Learning Paths</h1>
                     <p className="subtitle">Create and manage your courses</p>
                 </div>
-                <button onClick={handleCreateNew} className="btn-create-new">
+                <button onClick={handleCreateNew} className="btn-create">
                     <span className="plus-icon">+</span> Create New Path
                 </button>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
-
-            {loadingPaths ? (
+            {/* Loading State */}
+            {loading ? (
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <p>Loading your paths...</p>
                 </div>
             ) : myPaths.length === 0 ? (
+                /* Empty State */
                 <div className="empty-state">
                     <div className="empty-icon">📚</div>
                     <h2>No paths created yet</h2>
                     <p>Start building your first learning path to share knowledge with learners!</p>
-                    <button onClick={handleCreateNew} className="btn-empty-action">
+                    <button onClick={handleCreateNew} className="btn-create">
                         Create Your First Path
                     </button>
                 </div>
             ) : (
+                /* Paths Grid */
                 <div className="paths-grid">
                     {myPaths.map((path) => (
                         <div 
@@ -119,33 +100,28 @@ const CreatorDashboard = () => {
                             className="path-card"
                             onClick={() => handleEditPath(path.id)}
                         >
-                            <div className="path-card-image">
+                            <div className="card-image">
                                 <img 
                                     src={path.image_url || 'https://via.placeholder.com/400x200?text=No+Image'} 
                                     alt={path.title}
                                     onError={(e) => {
-                                        console.log("Image failed to load:", path.image_url);
                                         e.target.src = 'https://via.placeholder.com/400x200?text=No+Image';
                                     }}
                                 />
-                                <div className={`visibility-badge ${path.is_public ? 'public' : 'private'}`}>
+                                <div className={`badge ${path.is_public ? 'public' : 'private'}`}>
                                     {path.is_public ? '🌐 Public' : '🔒 Private'}
                                 </div>
                             </div>
                             
-                            <div className="path-card-content">
-                                <h3 className="path-title">{path.title}</h3>
+                            <div className="card-content">
+                                <h3>{path.title}</h3>
                                 
-                                <div className="path-stats">
-                                    <span className="stat-item">
-                                        📝 {path.resource_count || 0} Resources
-                                    </span>
-                                    <span className="stat-item">
-                                        ⏱️ {path.total_time || 0} mins
-                                    </span>
+                                <div className="card-stats">
+                                    <span>📝 {path.resource_count || 0} Resources</span>
+                                    <span>⏱️ {path.total_time || 0} mins</span>
                                 </div>
 
-                                <div className="path-card-actions">
+                                <div className="card-actions">
                                     <button 
                                         onClick={(e) => handleToggleVisibility(path.id, path.is_public, e)}
                                         className="btn-toggle"

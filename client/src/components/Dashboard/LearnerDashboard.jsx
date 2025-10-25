@@ -2,13 +2,15 @@ import React, { useEffect, useState, useContext } from "react";
 import API from "../../api";
 import { AuthContext } from "../../context/AuthContext";
 import ProgressBar from "../learnerview/ProgressBar";
-import "../../styles/learnerDashboard.css"; // Ensure CSS is imported
-import { useNavigate, Link } from "react-router-dom"; // Import Link
+import "../../styles/learnerDashboard.css";
+import { useNavigate, Link } from "react-router-dom";
+
 const BACKEND_URL_BASE = process.env.REACT_APP_API_URL 
     ? process.env.REACT_APP_API_URL.replace('/api', '') 
     : 'http://localhost:5000';
+
 const LearnerDashboard = () => {
-    const { user, logout } = useContext(AuthContext); // Get user and logout
+    const { user, logout } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [enrolledPaths, setEnrolledPaths] = useState([]);
@@ -16,7 +18,7 @@ const LearnerDashboard = () => {
 
     const fetchLearningPaths = async () => {
         try {
-            setLoading(true); // Ensure loading starts
+            setLoading(true);
             const res = await API.get("/learner/learning-paths");
             const allPaths = res.data;
             const enrolled = allPaths.filter(path => path.registered);
@@ -37,95 +39,103 @@ const LearnerDashboard = () => {
     const registerPath = async (pathId) => {
         try {
             await API.post("/learner/register-path", { path_id: pathId });
-            fetchLearningPaths(); // Refetch to update lists
+            fetchLearningPaths();
         } catch (err) {
             console.error("Error registering path:", err.response || err);
         }
     };
 
-    if (loading) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Loading learning paths...</p>; // Added basic loading style
+    if (loading) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Loading learning paths...</p>;
 
-    // --- UPDATED PathCard helper component ---
-  const PathCard = ({ path, isResumeCard = false }) => (
-    // Keep the main div and its onClick
-    <div 
-      key={path.id} 
-      className={`path-card ${isResumeCard ? 'resume-card' : ''}`}
-      onClick={() => navigate(`/path/view/${path.id}`)} 
-    >
-      <div className="path-header">
-        <img
-  src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
-  alt={path.title}
-  className="path-image"
-/>
-        <div className="path-info">
-          <h3>{path.title}</h3>
-          <p>{path.short_description}</p>
-          {path.registered && (
-            <>
-              <ProgressBar progress={path.progress || 0} />
-              <p>{path.progress || 0}% completed</p>
-            </>
-          )}
+    // ✅ PathCard for ENROLLED paths - Card IS clickable!
+    const EnrolledPathCard = ({ path, isResumeCard = false }) => (
+        <div 
+            key={path.id} 
+            className={`path-card ${isResumeCard ? 'resume-card' : ''}`}
+            onClick={() => navigate(`/path/view/${path.id}`)} // ✅ Card is clickable for enrolled!
+            style={{ cursor: 'pointer' }}
+        >
+            <div className="path-header">
+                <img
+                    src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
+                    alt={path.title}
+                    className="path-image"
+                />
+                <div className="path-info">
+                    <h3>{path.title}</h3>
+                    <p>{path.short_description}</p>
+                    <ProgressBar progress={path.progress || 0} />
+                    <p>{path.progress || 0}% completed</p>
+                </div>
+            </div>
+
+            <div className="path-card-actions">
+                {/* Continue Learning Button */}
+                {!path.completed && (
+                    <button
+                        className="continue-learning-btn"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/path/view/${path.id}`);
+                        }}
+                    >
+                        Continue Learning
+                    </button>
+                )}
+
+                {/* Certificate Button if completed */}
+                {path.completed && (
+                    <a
+                        href={`${API.defaults.baseURL}/learner/certificate/${path.id}?token=${localStorage.getItem('token')}`}
+                        className="certificate-btn"
+                        onClick={(e) => e.stopPropagation()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'none', textAlign: 'center' }}
+                    >
+                        Download Certificate
+                    </a>
+                )}
+            </div>
         </div>
-      </div>
+    );
 
-      {/* --- Button Logic --- */}
-      <div className="path-card-actions"> {/* Optional: Wrapper for buttons */}
-        
-        {/* --- ADD THIS: Show "Continue" if registered BUT NOT complete --- */}
-        {path.registered && !path.completed && (
-          <button
-            className="continue-learning-btn" // Use a distinct class for styling
-            onClick={(e) => {
-              e.stopPropagation(); // Stop card navigation
-              navigate(`/path/view/${path.id}`); // Navigate when button clicked
-            }}
-          >
-            Continue Learning
-          </button>
-        )}
-        {/* --- END OF ADDED BUTTON --- */}
+    // ✅ PathCard for RECOMMENDED paths - Card is NOT clickable!
+    const RecommendedPathCard = ({ path }) => (
+        <div 
+            key={path.id} 
+            className="path-card"
+            // ❌ NO onClick here - card is NOT clickable for recommended!
+        >
+            <div className="path-header">
+                <img
+                    src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
+                    alt={path.title}
+                    className="path-image"
+                />
+                <div className="path-info">
+                    <h3>{path.title}</h3>
+                    <p>{path.short_description}</p>
+                </div>
+            </div>
 
-        {/* Show "Register" button if NOT registered */}
-        {!path.registered && (
-    <button
-      className="register-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        // CHANGE: Navigate to the details page instead of registering immediately
-        navigate(`/path/details/${path.id}`); 
-      }}
-    >
-      View Details & Register
-    </button>
-)}
+            <div className="path-card-actions">
+                {/* Only View Details button works */}
+                <button
+                    className="register-btn"
+                    onClick={() => navigate(`/path/details/${path.id}`)}
+                >
+                    View Details & Register
+                </button>
+            </div>
+        </div>
+    );
 
-        {/* Show "Certificate" button if COMPLETED */}
-        {path.completed && (
-          <a
-            href={`${API.defaults.baseURL}/learner/certificate/${path.id}?token=${localStorage.getItem('token')}`}
-            className="certificate-btn"
-            onClick={(e) => e.stopPropagation()} 
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ textDecoration: 'none', textAlign: 'center' }}
-          >
-            Download Certificate
-          </a>
-        )}
-      </div> {/* End button wrapper */}
-    </div>
-  );
-
-    // Logout Handler
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
-    // Get user initials for avatar
     const getUserInitials = (name) => {
         if (!name) return '?';
         const parts = name.trim().split(' ');
@@ -140,7 +150,7 @@ const LearnerDashboard = () => {
     return (
         <div className="dashboard-layout">
 
-            {/* --- Sidebar --- */}
+            {/* Sidebar */}
             <div className="sidebar">
                 <div className="sidebar-header">My Learning</div>
                 <nav className="sidebar-nav">
@@ -157,12 +167,10 @@ const LearnerDashboard = () => {
                     </button>
                 </div>
             </div>
-            {/* --- END Sidebar --- */}
 
-            {/* --- Main Content Area --- */}
+            {/* Main Content Area */}
             <div className="dashboard-main-content">
 
-                {/* --- UPDATED HEADER --- */}
                 <div className="dashboard-header-content">
                     <div className="user-avatar">
                         {getUserInitials(user?.name)}
@@ -172,18 +180,17 @@ const LearnerDashboard = () => {
                         <p className="header-subtitle">Keep up the great work!</p>
                     </div>
                 </div>
-                {/* --- END UPDATED HEADER --- */}
 
-                {/* --- SECTION 1: PICK UP WHERE YOU LEFT OFF --- */}
+                {/* SECTION 1: PICK UP WHERE YOU LEFT OFF */}
                 <section className="dashboard-section">
                     <h3>Pick up where you left off</h3>
                     <div className="paths-container">
                         {enrolledPaths.length > 0 ? (
                             enrolledPaths.map((path, index) => (
-                                <PathCard
+                                <EnrolledPathCard
                                     path={path}
                                     key={path.id}
-                                    isResumeCard={index === 0} // Mark the first one
+                                    isResumeCard={index === 0}
                                 />
                             ))
                         ) : (
@@ -192,13 +199,13 @@ const LearnerDashboard = () => {
                     </div>
                 </section>
 
-                {/* --- SECTION 2: RECOMMENDED FOR YOU --- */}
+                {/* SECTION 2: RECOMMENDED FOR YOU */}
                 <section className="dashboard-section">
                     <h3>Recommended for you</h3>
                     <div className="paths-container">
                         {recommendedPaths.length > 0 ? (
                             recommendedPaths.map(path => (
-                                <PathCard path={path} key={path.id} />
+                                <RecommendedPathCard path={path} key={path.id} />
                             ))
                         ) : (
                             <p className="empty-state-message">You've enrolled in all available paths!</p>
@@ -207,7 +214,6 @@ const LearnerDashboard = () => {
                 </section>
 
             </div>
-            {/* --- END Main Content --- */}
         </div>
     );
 };

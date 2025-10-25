@@ -560,6 +560,15 @@
     min-height: 400px;
     color: #6b7280;
 }
+.create-path-container {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    overflow-y: auto; /* 🎯 ADD THIS */
+    height: 100vh; /* 🎯 ADD THIS */
+}
 
 /* Responsive */
 @media (max-width: 768px) {

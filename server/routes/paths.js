@@ -10,8 +10,7 @@ router.get('/mypaths', authMiddleware, async (req, res) => {
     }
       
     try {
-        const creator_id = req.user.id;
-        
+        const creator_id = req.user.id;      
         // 🛑 CRITICAL FIX: Use JOIN, COUNT, and SUM to retrieve all data required by the dashboard cards
         const myPaths = await pool.query(
             `SELECT 
@@ -41,7 +40,42 @@ router.get('/mypaths', authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Server Error fetching creator paths." });
     }
 });
+// Add this to paths.js (after your /mypaths route)
+router.get('/learning-paths/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const creator_id = req.user.id;
 
+        // Get the path (ensure user owns it)
+        const pathResult = await pool.query(
+            'SELECT * FROM LearningPaths WHERE id = $1 AND creator_id = $2',
+            [id, creator_id]
+        );
+
+        if (pathResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Path not found or access denied' });
+        }
+
+        // Get ALL resources for this path
+        const resourcesResult = await pool.query(
+            'SELECT * FROM Resources WHERE path_id = $1 ORDER BY order_index',
+            [id]
+        );
+
+        // Combine path data with resources
+        const pathWithResources = {
+            ...pathResult.rows[0],
+            resources: resourcesResult.rows
+        };
+
+        console.log(`[LOG] Fetched path ${id} with ${resourcesResult.rows.length} resources`);
+        res.json(pathWithResources);
+
+    } catch (err) {
+        console.error('Error fetching path details:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 // -------------------------------------------------------------------------
 // --- 2. GET /api/paths/view/:pathId - FIXED TO INCLUDE LEARNER PROGRESS ---
 // -------------------------------------------------------------------------
