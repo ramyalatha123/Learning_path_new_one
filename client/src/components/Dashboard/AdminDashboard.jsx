@@ -1,24 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
-import API from '../../api'; // Adjust path if needed
-import { AuthContext } from '../../context/AuthContext'; // Adjust path if needed
-import '../../styles/AdminDashboard.css'; // Make sure you import the CSS
+import API from '../../api';
+import { AuthContext } from '../../context/AuthContext';
+import '../../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
 
-    // State for users
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [userError, setUserError] = useState('');
     const [userMessage, setUserMessage] = useState('');
 
-    // State for paths
     const [paths, setPaths] = useState([]);
     const [loadingPaths, setLoadingPaths] = useState(true);
     const [pathError, setPathError] = useState('');
     const [pathMessage, setPathMessage] = useState('');
 
-    // Fetch users
     const fetchUsers = async () => {
         try {
             setLoadingUsers(true);
@@ -34,7 +31,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // Fetch paths
     const fetchPaths = async () => {
         try {
             setLoadingPaths(true);
@@ -50,13 +46,11 @@ const AdminDashboard = () => {
         }
     };
 
-    // Fetch data when component mounts
     useEffect(() => {
         fetchUsers();
         fetchPaths();
     }, []);
 
-    // Delete user handler
     const handleDeleteUser = async (userId) => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
@@ -64,14 +58,13 @@ const AdminDashboard = () => {
             setUserMessage('');
             const res = await API.delete(`/admin/users/${userId}`);
             setUserMessage(res.data.message);
-            fetchUsers(); // Refresh the list
+            fetchUsers();
         } catch (err) {
-             console.error("Error deleting user:", err);
+            console.error("Error deleting user:", err);
             setUserError(err.response?.data?.message || 'Failed to delete user.');
         }
     };
 
-    // Delete path handler
     const handleDeletePath = async (pathId) => {
         if (!window.confirm('Delete this Learning Path? This affects all users.')) return;
         try {
@@ -79,112 +72,178 @@ const AdminDashboard = () => {
             setPathMessage('');
             const res = await API.delete(`/admin/paths/${pathId}`);
             setPathMessage(res.data.message);
-            fetchPaths(); // Refresh the list
+            fetchPaths();
         } catch (err) {
-             console.error("Error deleting path:", err);
+            console.error("Error deleting path:", err);
             setPathError(err.response?.data?.message || 'Failed to delete path.');
         }
     };
 
-    // Render loading state
     if (loadingUsers || loadingPaths) {
-         return <p>Loading Admin Dashboard...</p>;
+        return (
+            <div className="admin-dashboard">
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>Loading Admin Dashboard...</p>
+                </div>
+            </div>
+        );
     }
 
-    // Render the dashboard content
     return (
-        // --- Main container with the class for flexbox layout ---
-        <div className="admin-dashboard"> 
+        <div className="admin-dashboard">
             
-            {/* --- Wrap header elements in .admin-header --- */}
-            <div className="admin-header"> 
-                <h1>Admin Dashboard</h1>
-                <p>Welcome, Admin {user?.name || user?.email}!</p>
+            {/* Header */}
+            <div className="admin-header">
+                <div className="header-content">
+                    <div>
+                        <h1>🛡️ Admin Dashboard</h1>
+                        <p>Welcome, {user?.name || user?.email}!</p>
+                    </div>
+                    <div className="stats-summary">
+                        <div className="stat-box">
+                            <span className="stat-number">{users.length}</span>
+                            <span className="stat-label">Total Users</span>
+                        </div>
+                        <div className="stat-box">
+                            <span className="stat-number">{paths.length}</span>
+                            <span className="stat-label">Total Paths</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* --- Wrap main content sections in .admin-content for scrolling --- */}
-            <div className="admin-content"> 
-
+            {/* Content */}
+            <div className="admin-content">
+                
                 {/* User Management Section */}
-                <section> 
-                    <h2>User Management</h2>
-                    {userError && <p style={{ color: 'red' }}>Error: {userError}</p>}
-                    {userMessage && <p style={{ color: 'green' }}>{userMessage}</p>}
-                    {users.length === 0 ? <p>No non-admin users found.</p> : (
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            {/* Table Head */}
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid #ccc', backgroundColor: '#f8f8f8' }}>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>ID</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>Name</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>Email</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>Role</th>
-                                    <th style={{ padding: '8px 12px' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            {/* Table Body */}
-                            <tbody>
-                                {users.map((u) => (
-                                    <tr key={u.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '8px 12px' }}>{u.id}</td>
-                                        <td style={{ padding: '8px 12px' }}>{u.name}</td>
-                                        <td style={{ padding: '8px 12px' }}>{u.email}</td>
-                                        <td style={{ padding: '8px 12px' }}>{u.role}</td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                                            <button
-                                                onClick={() => handleDeleteUser(u.id)}
-                                                style={{ color: 'red', background: 'none', border: '1px solid red', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer' }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
+                <section className="admin-section">
+                    <div className="section-header">
+                        <h2>👥 User Management</h2>
+                    </div>
+                    
+                    {userError && (
+                        <div className="alert alert-error">
+                            <span className="alert-icon">⚠️</span>
+                            {userError}
+                        </div>
+                    )}
+                    {userMessage && (
+                        <div className="alert alert-success">
+                            <span className="alert-icon">✅</span>
+                            {userMessage}
+                        </div>
+                    )}
+                    
+                    {users.length === 0 ? (
+                        <div className="empty-state-small">
+                            <p>No users found.</p>
+                        </div>
+                    ) : (
+                        <div className="table-container">
+                            <table className="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {users.map((u) => (
+                                        <tr key={u.id}>
+                                            <td>
+                                                <span className="id-badge">#{u.id}</span>
+                                            </td>
+                                            <td>
+                                                <span className="user-name">{u.name}</span>
+                                            </td>
+                                            <td>{u.email}</td>
+                                            <td>
+                                                <span className={`role-badge ${u.role}`}>
+                                                    {u.role === 'creator' ? '🎨' : '📚'} {u.role}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDeleteUser(u.id)}
+                                                    className="btn-delete"
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </section>
 
                 {/* Path Management Section */}
-                <section> 
-                    <h2>Learning Path Management</h2>
-                    {pathError && <p style={{ color: 'red' }}>Error: {pathError}</p>}
-                    {pathMessage && <p style={{ color: 'green' }}>{pathMessage}</p>}
-                    {paths.length === 0 ? <p>No learning paths found.</p> : (
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                             {/* Table Head */}
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid #ccc', backgroundColor: '#f8f8f8' }}>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>ID</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>Title</th>
-                                    <th style={{ textAlign: 'left', padding: '8px 12px' }}>Creator Email</th>
-                                    <th style={{ padding: '8px 12px' }}>Actions</th>
-                                </tr>
-                            </thead>
-                             {/* Table Body */}
-                            <tbody>
-                                {paths.map((p) => (
-                                    <tr key={p.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '8px 12px' }}>{p.id}</td>
-                                        <td style={{ padding: '8px 12px' }}>{p.title}</td>
-                                        <td style={{ padding: '8px 12px' }}>{p.creator_email}</td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                                            <button
-                                                onClick={() => handleDeletePath(p.id)}
-                                                 style={{ color: 'red', background: 'none', border: '1px solid red', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer' }}
-                                            >
-                                                Delete Path
-                                            </button>
-                                        </td>
+                <section className="admin-section">
+                    <div className="section-header">
+                        <h2>📚 Learning Path Management</h2>
+                    </div>
+                    
+                    {pathError && (
+                        <div className="alert alert-error">
+                            <span className="alert-icon">⚠️</span>
+                            {pathError}
+                        </div>
+                    )}
+                    {pathMessage && (
+                        <div className="alert alert-success">
+                            <span className="alert-icon">✅</span>
+                            {pathMessage}
+                        </div>
+                    )}
+                    
+                    {paths.length === 0 ? (
+                        <div className="empty-state-small">
+                            <p>No learning paths found.</p>
+                        </div>
+                    ) : (
+                        <div className="table-container">
+                            <table className="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Creator</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {paths.map((p) => (
+                                        <tr key={p.id}>
+                                            <td>
+                                                <span className="id-badge">#{p.id}</span>
+                                            </td>
+                                            <td>
+                                                <span className="path-title">{p.title}</span>
+                                            </td>
+                                            <td>{p.creator_email}</td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDeletePath(p.id)}
+                                                    className="btn-delete"
+                                                >
+                                                    🗑️ Delete Path
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </section>
 
-            </div> {/* End admin-content */}
-        </div> // End admin-dashboard
+            </div>
+        </div>
     );
 };
 

@@ -4,6 +4,145 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import API from "../../api";
 import "../../styles/EditPathPage.css";
 
+// ✅ QUIZ BUILDER MODAL COMPONENT
+function QuizBuilderModal({ resource, onSave, onCancel }) {
+    const [questions, setQuestions] = useState(resource.questions || []);
+    const [newQuestionText, setNewQuestionText] = useState('');
+    const [newOptions, setNewOptions] = useState(['', '', '', '']);
+    const [correctOptionIndex, setCorrectOptionIndex] = useState(-1);
+
+    const handleAddQuestion = () => {
+        if (!newQuestionText.trim()) {
+            alert("Please enter a question!");
+            return;
+        }
+        
+        if (correctOptionIndex === -1) {
+            alert("Please select the correct answer!");
+            return;
+        }
+
+        const filledOptions = newOptions.filter(o => o.trim());
+        if (filledOptions.length < 2) {
+            alert("Please provide at least 2 options!");
+            return;
+        }
+
+        const questionToAdd = {
+            text: newQuestionText.trim(),
+            options: filledOptions.map((text, index) => ({
+                text: text.trim(),
+                isCorrect: index === correctOptionIndex
+            }))
+        };
+        
+        setQuestions([...questions, questionToAdd]);
+        setNewQuestionText('');
+        setNewOptions(['', '', '', '']);
+        setCorrectOptionIndex(-1);
+    };
+
+    const handleSave = () => { 
+        if (questions.length === 0) {
+            alert("Please add at least one question!");
+            return;
+        }
+        onSave(questions); 
+    };
+
+    const handleOptionChange = (index, value) => {
+        const updated = [...newOptions];
+        updated[index] = value;
+        setNewOptions(updated);
+    };
+
+    const handleRemoveQuestion = (index) => {
+        setQuestions(questions.filter((_, i) => i !== index));
+    };
+
+    return ( 
+        <div className="modal-backdrop" onClick={onCancel}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h2>📝 Quiz Builder: {resource.title}</h2>
+                
+                {/* Display Added Questions */}
+                <div className="quiz-questions-display">
+                    <h3>Added Questions ({questions.length})</h3>
+                    {questions.length === 0 ? (
+                        <p className="empty-message">No questions yet. Add your first question below!</p>
+                    ) : (
+                        questions.map((q, qIndex) => (
+                            <div key={qIndex} className="quiz-question-item">
+                                <div className="question-header">
+                                    <strong>Q{qIndex + 1}: {q.text}</strong>
+                                    <button 
+                                        onClick={() => handleRemoveQuestion(qIndex)}
+                                        className="btn-remove-question"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <ul>
+                                    {q.options.map((o, oIndex) => (
+                                        <li key={oIndex} style={{ color: o.isCorrect ? '#10b981' : '#6b7280' }}>
+                                            {o.isCorrect && '✓ '}{o.text}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Add New Question Form */}
+                <div className="quiz-add-form">
+                    <h3>Add New Question</h3>
+                    <input 
+                        type="text" 
+                        placeholder="Enter your question" 
+                        value={newQuestionText} 
+                        onChange={(e) => setNewQuestionText(e.target.value)}
+                        className="form-input-modal"
+                    />
+                    
+                    <div className="options-section">
+                        <p className="options-label">Options (select the correct answer):</p>
+                        {newOptions.map((option, index) => (
+                            <div key={index} className="option-row">
+                                <input 
+                                    type="radio" 
+                                    name="correctOption" 
+                                    checked={correctOptionIndex === index}
+                                    onChange={() => setCorrectOptionIndex(index)} 
+                                />
+                                <input 
+                                    type="text" 
+                                    placeholder={`Option ${index + 1}`}
+                                    value={option}
+                                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                                    className="form-input-modal"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <button onClick={handleAddQuestion} className="btn-add-question">
+                        ➕ Add This Question
+                    </button>
+                </div>
+                
+                {/* Modal Actions */}
+                <div className="modal-actions">
+                    <button onClick={onCancel} className="btn-cancel-modal">Cancel</button>
+                    <button onClick={handleSave} className="btn-save-modal">
+                        ✓ Save Quiz ({questions.length} questions)
+                    </button>
+                </div>
+            </div>
+        </div> 
+    );
+}
+
 const EditPathPage = () => {
     const navigate = useNavigate();
     const { pathId } = useParams();
@@ -14,6 +153,10 @@ const EditPathPage = () => {
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [isPublic, setIsPublic] = useState(false);
+    
+    // ✅ QUIZ MODAL STATES
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingResourceIndex, setEditingResourceIndex] = useState(null);
     
     const [newResource, setNewResource] = useState({ 
         title: "", 
@@ -49,6 +192,7 @@ const EditPathPage = () => {
                 url: res.url || '',
                 description: res.description || '',
                 estimatedTime: res.estimated_time || 0,
+                questions: res.questions || [], // ✅ Include questions
                 tempId: `existing-${res.id || index}`,
                 order: index
             }));
@@ -98,6 +242,7 @@ const EditPathPage = () => {
             url: newResource.url,
             description: newResource.description,
             estimatedTime: parseInt(newResource.estimatedTime) || 0,
+            questions: newResource.type === 'quiz' ? [] : undefined, // ✅ Initialize questions
             tempId: `new-${Date.now()}`,
             order: resources.length,
             isNew: true
@@ -112,6 +257,26 @@ const EditPathPage = () => {
             description: "", 
             estimatedTime: "0" 
         });
+    };
+
+    // ✅ QUIZ MODAL FUNCTIONS
+    const openQuizEditor = (index) => {
+        setIsModalOpen(true);
+        setEditingResourceIndex(index);
+    };
+
+    const handleSaveQuiz = (questionsData) => {
+        const updatedResources = [...resources];
+        updatedResources[editingResourceIndex].questions = questionsData;
+        setResources(updatedResources);
+        setIsModalOpen(false);
+        setEditingResourceIndex(null);
+        alert(`Quiz saved with ${questionsData.length} questions!`);
+    };
+
+    const handleCancelQuiz = () => {
+        setIsModalOpen(false);
+        setEditingResourceIndex(null);
     };
 
     const removeResource = (index) => {
@@ -133,7 +298,6 @@ const EditPathPage = () => {
         }));
         
         setResources(reorderedItems);
-        console.log("Resources reordered");
     };
 
     const handleToggleVisibility = async () => {
@@ -190,6 +354,7 @@ const EditPathPage = () => {
                 url: res.url || null,
                 description: res.description || "",
                 estimated_time: parseInt(res.estimatedTime) || 0,
+                questions: res.questions || [], // ✅ Include questions
                 order: index
             }));
 
@@ -379,15 +544,32 @@ const EditPathPage = () => {
                                                             <div className="resource-meta">
                                                                 <span className="resource-type">{res.type}</span>
                                                                 <span className="resource-time">⏱️ {res.estimatedTime} mins</span>
+                                                                {/* ✅ Show question count for quizzes */}
+                                                                {res.type === 'quiz' && (
+                                                                    <span className="quiz-count">
+                                                                        📝 {res.questions?.length || 0} questions
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button 
-                                                        onClick={() => removeResource(index)}
-                                                        className="btn-remove"
-                                                    >
-                                                        🗑️ Remove
-                                                    </button>
+                                                    <div className="resource-actions">
+                                                        {/* ✅ Edit Quiz Button */}
+                                                        {res.type === 'quiz' && (
+                                                            <button 
+                                                                onClick={() => openQuizEditor(index)}
+                                                                className="btn-edit-quiz"
+                                                            >
+                                                                ✏️ Edit Quiz
+                                                            </button>
+                                                        )}
+                                                        <button 
+                                                            onClick={() => removeResource(index)}
+                                                            className="btn-remove"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             )}
                                         </Draggable>
@@ -420,6 +602,15 @@ const EditPathPage = () => {
                     {isSubmitting ? 'Updating...' : '✓ Update Path'}
                 </button>
             </div>
+
+            {/* ✅ QUIZ MODAL */}
+            {isModalOpen && (
+                <QuizBuilderModal
+                    resource={resources[editingResourceIndex]}
+                    onSave={handleSaveQuiz}
+                    onCancel={handleCancelQuiz}
+                />
+            )}
         </div>
         </div>
     );
