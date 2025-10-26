@@ -46,7 +46,7 @@
 - Status: 200
 - Database updated successfully
 
-**Screenshot:** [Test 2: Progress Update Success](testing_images/progress_update.png)
+**Screenshot:** ![Test 2: Progress Update Success](testing_images/progress_update.png)
 
 ---
 
@@ -69,7 +69,7 @@
 - Certificate downloaded successfully
 - Contains learner name and path title
 
-**Screenshot:** [Test 3: Certificate Download Success](testing_images/certificate_completion.png)
+**Screenshot:** ![Test 3: Certificate Download Success](testing_images/certificate_completion.png)
 
 ---
 
