@@ -1,24 +1,20 @@
-# --- Backend Dockerfile (server/Dockerfile) ---
+# Use a Node base image
+FROM node:18-alpine
 
-# 1. Base Image
-FROM node:18-alpine AS base
-
-# 2. Set working directory inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# 3. Copy ONLY package files first. 
-# We remove 'server/' because the build context is already the 'server' folder.
-COPY package*.json ./ 
+# Copy package files to install dependencies
+COPY package*.json ./
 
-# 4. Install production dependencies
+# Install only production dependencies
 RUN npm ci --only=production
 
-# 5. Copy the rest of your server application code.
-# We copy everything from the current directory (which is the server folder) into /app.
+# Copy all application code (index.js, routes, public/, etc.)
 COPY . .
 
-# 6. Expose the port the server runs on
+# Expose the port the server listens on
 EXPOSE 5000
 
-# 7. Define the command to start the server (still runs from /app)
+# Command to start the application
 CMD ["node", "index.js"]

@@ -1,35 +1,26 @@
-# --- Frontend Dockerfile (client/Dockerfile) ---
+# --- STAGE 1: BUILD THE REACT APPLICATION ---
+FROM node:18-alpine AS build
 
-# --- Stage 1: Build the React App ---
-FROM node:18-alpine AS builder
+WORKDIR /app
 
-# Set working directory for the build stage
-WORKDIR /app/client
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies (use --legacy-peer-deps if needed for react-beautiful-dnd)
+# Copy package files and install dependencies
+COPY package.json ./
+COPY package-lock.json ./
+# Use the legacy-peer-deps flag to avoid conflicts with react-beautiful-dnd
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the client application code
+# Copy source code and build the application
 COPY . .
-
-# Build the production-ready static files
-# Output will be in the /app/client/build folder
 RUN npm run build
 
-# --- Stage 2: Serve the built app with Nginx ---
-FROM nginx:stable-alpine
+# --- STAGE 2: SERVE THE APPLICATION VIA NGINX ---
+FROM nginx:alpine
 
-# Copy the built static files from the 'builder' stage to Nginx's web root
-COPY --from=builder /app/client/build /usr/share/nginx/html
+# Copy the static build output from the build stage into Nginx's public directory
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy a custom Nginx configuration file (we'll create this next)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80 (standard HTTP port Nginx listens on)
+# Expose port 80 (standard HTTP port for Nginx)
 EXPOSE 80
 
-# Command to start Nginx in the foreground
+# Command to start Nginx
 CMD ["nginx", "-g", "daemon off;"]

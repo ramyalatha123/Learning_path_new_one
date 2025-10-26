@@ -1,14 +1,17 @@
 // Import pg package
 const { Pool } = require('pg');
 require('dotenv').config(); // Loads environment variables from .env (for local use)
-const connectionString = process.env.DATABASE_URL ||
-                         'postgresql://postgres:ramya@localhost:5433/learningpath_db'; // Your local connection
+// In server/db.js
 
-// Configure the database connection
+const connectionString = process.env.DATABASE_URL ||
+                         'postgresql://postgres:ramya@localhost:5434/learningpath_db';
+
+// CRITICAL FIX: Explicitly disable SSL if connecting locally (i.e., not the live Render URL)
 const pool = new Pool({
-  connectionString: connectionString, // Use the chosen connection string
-  // Add SSL config later if deploying to Heroku/Render requires it
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  connectionString: connectionString, 
+  ssl: process.env.NODE_ENV === 'production' 
+       ? { rejectUnauthorized: false }  // Use SSL only in production (Render)
+       : false                         // Disable SSL for local development (Docker/localhost)
 });
 
 
