@@ -4,7 +4,7 @@ require('dotenv').config(); // Loads environment variables from .env (for local 
 // In server/db.js
 
 const connectionString = process.env.DATABASE_URL ||
-                         'postgresql://postgres:ramya@localhost:5434/learningpath_db';
+                         'postgresql://postgres:ramya@localhost:5432/learningpath_db';
 
 // CRITICAL FIX: Explicitly disable SSL if connecting locally (i.e., not the live Render URL)
 const pool = new Pool({

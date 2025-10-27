@@ -46,7 +46,7 @@ const PathDetails = () => {
     const handleRegister = async () => {
         try {
             await API.post("/learner/register-path", { path_id: pathId });
-            alert(`Successfully registered for ${path.title}! You can start learning now.`);
+            alert(`Successfully registered! You can start learning now.`);
             navigate(`/path/view/${pathId}`); 
         } catch (err) {
             alert(err.response?.data?.message || "Failed to register for the path. Please try again.");

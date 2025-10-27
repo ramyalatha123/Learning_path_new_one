@@ -2,31 +2,48 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db");
 const verifyToken = require("../middleware/auth");
-const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
 // --- Multer storage config ---
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, "../public/assets");
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary directly here
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
-const upload = multer({ storage: storage });
+
+console.log('🔧 Cloudinary Config:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY ? 'Set ✅' : 'Not Set ❌',
+  api_secret: process.env.CLOUDINARY_API_SECRET ? 'Set ✅' : 'Not Set ❌'
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'learning-paths',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp'],
+    public_id: (req, file) => 'path-' + Date.now(),
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+console.log('✅ Multer with Cloudinary storage configured!');
 
 // ✅ Upload file route
 router.post("/upload-file", verifyToken, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-    const fileUrl = `/assets/${req.file.filename}`;
+    const fileUrl = req.file.path;
     res.status(200).json({ message: "File uploaded successfully", fileUrl: fileUrl });
   } catch (err) {
     console.error("Error uploading file:", err);
@@ -144,40 +161,40 @@ router.post(
   async (req, res) => {
     console.log("--- Request Received for POST /learning-paths ---");
     console.log("Multer processed file:", req.file);
-    console.log("Multer processed body:", req.body);
+    console.log("Cloudinary URL:", req.file?.path);
+
+    // 🎯 ADD THIS: Check if Cloudinary upload actually happened
+    if (req.file) {
+        console.log("✅ File object exists");
+        console.log("File path (Cloudinary URL):", req.file.path);
+        console.log("File public_id:", req.file.filename);
+    } else {
+        console.log("❌ No file received by multer!");
+    }
 
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
         const userId = req.user.id;
 
-        if (!req.body) {
-            console.error("!!! req.body is undefined AFTER multer processing !!!");
-            await client.query('ROLLBACK');
-            return res.status(400).json({ message: "Form data missing or invalid." });
-        }
-
         const { title, resources } = req.body;
-
-        console.log("[LOG] Extracted title:", title);
-        console.log("[LOG] Extracted resources string:", resources);
-
         let image_url = null;
 
         if (!title || !resources) {
-            console.error("!!! Title or resources missing !!!");
             await client.query('ROLLBACK');
             return res.status(400).json({ message: "Title and resources are required" });
         }
 
-        if (req.file) {
-            image_url = `/assets/${req.file.filename}`;
-            console.log("[LOG] Image file received, constructed image_url:", image_url);
+        if (req.file && req.file.path) {
+            image_url = req.file.path;  // This is the Cloudinary URL
+            console.log("[LOG] ✅ Cloudinary image URL:", image_url);
         } else {
-             console.error("!!! Image file missing !!!");
-             await client.query('ROLLBACK');
-            return res.status(400).json({ message: "Image is required" });
+            console.error("!!! Image file missing or upload failed !!!");
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: "Image upload failed" });
         }
+
+        // ... rest of your code stays the same ...
 
         let parsedResources;
         try {
@@ -324,7 +341,8 @@ router.put(
         let updateParams = [title];
         
         if (req.file) {
-            const image_url = `/assets/${req.file.filename}`;
+            const image_url = req.file.path;
+            console.log("[LOG] New Cloudinary image URL:", image_url);
             updateQuery += ', image_url = $2 WHERE id = $3';
             updateParams.push(image_url, pathId);
         } else {

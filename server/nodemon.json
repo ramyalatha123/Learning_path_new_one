@@ -1,0 +1,14 @@
+{
+  "watch": ["routes", "middleware", "config", "*.js"],
+  "ignore": [
+    "node_modules",
+    "public",
+    "public/assets",
+    "*.log",
+    "*.txt"
+  ],
+  "ext": "js,json",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

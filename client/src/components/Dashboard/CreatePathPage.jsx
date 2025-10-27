@@ -206,44 +206,51 @@ const CreatePathPage = () => {
     };
 
     const submitPath = async () => {
-        if (!pathTitle || !image || resources.length === 0) { 
-            alert("Title, image, & at least one resource required!"); 
-            return; 
-        }
+    if (!pathTitle || !image || resources.length === 0) { 
+        alert("Title, image, & at least one resource required!"); 
+        return; 
+    }
 
-        setIsSubmitting(true);
-        try { 
-            const formData = new FormData(); 
-            formData.append("title", pathTitle); 
+    console.log("=== SUBMITTING PATH ===");
+    console.log("Title:", pathTitle);
+    console.log("Image:", image);
+    console.log("Resources:", resources.length);
 
-            const resToSend = resources.map(({ tempId, estimatedTime, ...rest }) => {
-                let cleanedTime = parseInt(estimatedTime, 10);
-                if (isNaN(cleanedTime)) cleanedTime = 0;
-                
-                return {
-                    ...rest,
-                    estimated_time: cleanedTime
-                };
-            });
+    setIsSubmitting(true);
+    try { 
+        const formData = new FormData(); 
+        formData.append("title", pathTitle); 
 
-            formData.append("resources", JSON.stringify(resToSend)); 
-            formData.append("image", image); 
-
-            await API.post("/creator/learning-paths", formData, { 
-                headers: { "Content-Type": "multipart/form-data" } 
-            }); 
+        const resToSend = resources.map(({ tempId, estimatedTime, ...rest }) => {
+            let cleanedTime = parseInt(estimatedTime, 10);
+            if (isNaN(cleanedTime)) cleanedTime = 0;
             
-            alert("Path created successfully!");
-            navigate('/dashboard/CreatorDashboard');
+            return {
+                ...rest,
+                estimated_time: cleanedTime
+            };
+        });
 
-        } catch (err) { 
-            console.error("Error creating path:", err);
-            alert(err.response?.data?.message || "Error creating path"); 
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+        formData.append("resources", JSON.stringify(resToSend)); 
+        formData.append("image", image);  // Image file
+        
+        console.log("Sending FormData to backend...");
 
+        // 🎯 FIX: Remove Content-Type header - let browser handle it!
+        const response = await API.post("/creator/learning-paths", formData); 
+        
+        console.log("Response:", response.data);
+        alert("Path created successfully!");
+        navigate('/dashboard/CreatorDashboard');
+
+    } catch (err) { 
+        console.error("Error creating path:", err);
+        console.error("Error response:", err.response?.data);
+        alert(err.response?.data?.message || "Error creating path"); 
+    } finally {
+        setIsSubmitting(false);
+    }
+};
     return (
         <div className="create-path-container">
             <div className="create-path-header">

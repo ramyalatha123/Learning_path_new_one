@@ -57,10 +57,17 @@ const LearnerDashboard = () => {
         >
             <div className="path-header">
                 <img
-                    src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
-                    alt={path.title}
-                    className="path-image"
-                />
+    src={
+        path.image_url
+            ? path.image_url.startsWith('http')
+                ? path.image_url
+                : `${BACKEND_URL_BASE}${path.image_url}`
+            : `${BACKEND_URL_BASE}/assets/default_course.png`
+    }
+    alt={path.title}
+    className="path-image"
+/>
+
                 <div className="path-info">
                     <h3>{path.title}</h3>
                     <p>{path.short_description}</p>
@@ -109,10 +116,17 @@ const LearnerDashboard = () => {
         >
             <div className="path-header">
                 <img
-                    src={path.image_url ? `${BACKEND_URL_BASE}${path.image_url}` : `${BACKEND_URL_BASE}/assets/default_course.png`}
-                    alt={path.title}
-                    className="path-image"
-                />
+    src={
+        path.image_url
+            ? path.image_url.startsWith('http')
+                ? path.image_url
+                : `${BACKEND_URL_BASE}${path.image_url}`
+            : `${BACKEND_URL_BASE}/assets/default_course.png`
+    }
+    alt={path.title}
+    className="path-image"
+/>
+
                 <div className="path-info">
                     <h3>{path.title}</h3>
                     <p>{path.short_description}</p>
